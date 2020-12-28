@@ -1,4 +1,5 @@
 import { defineComponent } from 'vue'
+import axios from 'axios'
 import PropTypes from '../utils/props'
 import tools from '../utils/tools'
 
@@ -12,12 +13,17 @@ export default defineComponent({
         bgColor: PropTypes.string,
         borderColor: PropTypes.string.def('#f6ca9d'),
         textColor: PropTypes.string,
+        boxShadow: PropTypes.bool.def(true),
+        boxShadowColor: PropTypes.string.def('#f6ca9d'),
+        boxShadowBlur: PropTypes.number.def(4),
         image: PropTypes.string,
         logo: PropTypes.string,
         maxTries: PropTypes.number.def(5),
         initAction: PropTypes.string,
+        initParams: PropTypes.object.def({}),
         verifyAction: PropTypes.string,
-        onSuccess: PropTypes.func
+        onSuccess: PropTypes.func,
+        onInit: PropTypes.func
     },
     computed: {
         getThemeColorStyle() {
@@ -33,6 +39,7 @@ export default defineComponent({
             target: 'https://admin.makeit.vip/components/captcha',
             avatar: 'https://file.makeit.vip/MIIT/M00/00/00/ajRkHV_pUyOALE2LAAAtlj6Tt_s370.png',
             powered: 'Powered By makeit.vip',
+            init: false,
             failed: false,
             tip: this.initAction ? '正在初始化验证码 ...' : '点击按钮进行验证',
             status: {
@@ -43,7 +50,35 @@ export default defineComponent({
             }
         }
     },
+    mounted() {
+        this.initCaptcha()
+    },
     methods: {
+        initCaptcha() {
+            if (this.initAction) {
+                this.tip = '正在初始化验证码 ...'
+                axios.get(this.initAction, this.initParams).then((res: any) => {
+                    this.failed = false
+                    this.init = true
+                    this.tip = '点击按钮进行验证'
+                    this.$emit('init', res.data)
+                }).catch(() => {
+                    this.init = false
+                    this.failed = true
+                    this.tip = '初始化接口有误，请稍候再试'
+                })
+            } else {
+                this.failed = false
+                this.init = true
+                this.tip = '点击按钮进行验证'
+            }
+        },
+        showCaptcha() {
+            if (!this.init || this.status.success) return
+            this.tip = '智能检测中 ...'
+            this.status.ready = false
+            this.status.scanning = true
+        },
         getRadarReadyElem() {
             return this.status.ready ? (
                 <div class={`${this.prefixCls}-radar-ready`}>
@@ -87,6 +122,7 @@ export default defineComponent({
                     : null,
                 borderColor: this.borderColor ?? null,
                 backgroundColor: this.bgColor ?? null,
+                boxShadow: this.boxShadow ? `0 0 ${tools.pxToRem(this.boxShadowBlur)}rem ${this.boxShadowColor}` : null,
                 background: this.image
             }
             return (
@@ -111,7 +147,7 @@ export default defineComponent({
         const height = tools.isNumber(this.height) ? tools.pxToRem(this.height) : null
         const style = {width: `${width}rem`, height: `${height}rem`}
         return (
-            <div class={cls} ref={this.prefixCls}>
+            <div class={cls} onClick={this.showCaptcha} ref={this.prefixCls}>
                 <div class={`${this.prefixCls}-content`} style={style}>
                     { this.getRadarElem() }
                 </div>

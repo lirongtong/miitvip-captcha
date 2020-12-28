@@ -13,6 +13,9 @@ const config = {
             javascriptEnabled: true
         }
     },
+    optimizeDeps: {
+        include: ['vue', 'axios']
+    },
     proxy: {
         '/v1': {
             target: 'http://local-account.makeit.vip',

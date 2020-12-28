@@ -47,6 +47,7 @@
         "lint": "eslint -c ./.eslintrc --fix --ext .jsx,.js,.vue,.ts ./src"
     },
     "dependencies": {
+        "axios": "^0.21.1",
         "vue": "^3.0.4",
         "vue-types": "^3.0.1"
     },
