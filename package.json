@@ -12,6 +12,7 @@
         "@vue/compiler-sfc": "^3.0.4",
         "less": "^4.0.0",
         "less-loader": "^7.2.0",
-        "vite": "^1.0.0-rc.13"
+        "vite": "^1.0.0-rc.13",
+        "vue-types": "^2.0.2"
     }
 }

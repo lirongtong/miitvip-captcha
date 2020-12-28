@@ -5,7 +5,8 @@ const config = {
     alias: {
         '/@/': resolve('example'),
         '/@src/': resolve('src'),
-        'makeit-captcha': '/@src/index.ts'
+        'makeit-captcha': '/@src/index.ts',
+        'makeit-captcha/style': '/@src/style.ts'
     },
     cssPreprocessOptions: {
         less: {
