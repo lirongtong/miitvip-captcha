@@ -11,7 +11,7 @@
 </h1>
 
 <div align="center">
-基于 Vue3.0 + Vite 的动态生成滑块的验证码组件。
+基于 Vue3.0 + Vite 开发的动态生成验证滑块的验证码组件。
 
 [![npm package](https://img.shields.io/npm/v/makeit-captcha.svg?style=flat-square)](https://www.npmjs.org/package/makeit-captcha)
 [![npm_downloads](http://img.shields.io/npm/dm/makeit-captcha.svg?style=flat-square)](http://www.npmtrends.com/makeit-captcha)
@@ -35,17 +35,20 @@ npm i makeit-captcha
 ## 使用
 ```ts
 import { createApp } from 'vue'
-import { createStore } from 'vuex'
-import router from './router'
 import MakeitCaptcha from 'makeit-captcha'
-import App from './app.vue'
 import 'makeit-captcha/dist/captcha.min.css'
+import App from './app.vue'
 
 const app = createApp(App)
-app.use(router)
-app.use(createStore({}))
 app.use(MakeitCaptcha)
 app.mount('#app')
+```
+
+## 示例
+```vue
+<template>
+    <mi-captcha></mi-captcha>
+</template>
 ```
 
 ## 更多
