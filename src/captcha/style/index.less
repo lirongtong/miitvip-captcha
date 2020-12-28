@@ -1,0 +1,148 @@
+@mi-font-size: 1rem;
+@mi-font-size-sm: 12px;
+@mi-font-size-normal: 14px;
+@mi-font-size-base: 16px;
+@mi-spacing: 8px;
+@mi-captcha: mi-captcha;
+@mi-font-family: "Pingfang SC", "Microsoft YaHei", "Monospaced Number", "Chinese Quote", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+/** Flex */
+.flex(@align: center, @justify: center) {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-align: @align;
+    align-items: @align;
+    justify-content: @justify;
+}
+
+/** Border Radius */
+.border-radius(@raduis: 4) {
+    -moz-border-radius: (@raduis / @mi-font-size-base) * @mi-font-size;
+    -webkit-border-radius: (@raduis / @mi-font-size-base) * @mi-font-size;
+    -o-border-radius: (@raduis / @mi-font-size-base) * @mi-font-size;
+    -khtml-border-radius: (@raduis / @mi-font-size-base) * @mi-font-size;
+    border-radius: (@raduis / @mi-font-size-base) * @mi-font-size;
+}
+
+.border-radius-circle() {
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    -o-border-radius: 50%;
+    -khtml-border-radius: 50%;
+    border-radius: 50%;
+}
+
+/** Properties */
+.properties(@key, @value: @mi-spacing) {
+    @{key}: (@value / @mi-font-size-base) * @mi-font-size;
+}
+
+/** Text Ellipsis */
+.text-ellipsis(){
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/** Letter Spacing  */
+.letter-spacing(@value: 2) {
+    .properties(letter-spacing, 2);
+}
+
+.@{mi-captcha} {
+    width: 100%;
+    .properties(height, 42);
+    font-family: @mi-font-family;
+
+    &-content {
+		width: 100%;
+		height: 100%;
+		position: relative;
+    }
+
+    &-radar {
+        position: absolute;
+		left: 0;
+		top: 0;
+		height: 100%;
+        width: 100%;
+        background: #fff;
+        border: 1px solid fade(#1d1e23, 20%);
+        cursor: pointer;
+        .properties(min-width, 160);
+
+        &-ready,
+		&-scan,
+		&-being,
+		&-success {
+			position: absolute;
+			transition: all .5s ease;
+			.properties(width, 30);
+			.properties(height, 30);
+			.properties(margin, 6);
+        }
+
+        &-ring,
+		&-dot {
+			position: absolute;
+			.border-radius-circle();
+			transform: scale(.4);
+			width: 100%;
+			height: 100%;
+			box-shadow: inset 0 0 0 1px #f6ca9d;
+			background-image: linear-gradient(0, rgba(0, 0, 0, 0) 50%, #fff 50%), linear-gradient(0, #fff 50%, rgba(0, 0, 0, 0) 50%);
+        }
+
+        &-dot {
+            background: #f6ca9d;
+        }
+
+        &-ring {
+			animation: mi-anim-wait 1s infinite;
+			transform: scale(1);
+        }
+
+        &-tip {
+			position: absolute;
+			left: 0;
+			top: 0;
+			width: 100%;
+			.properties(height, 42);
+			.properties(padding-left, 48);
+			.properties(padding-right, 48);
+			.properties(font-size, @mi-font-size-normal);
+			.properties(line-height, 42);
+			color: #1d1e23;
+			.text-ellipsis();
+			text-align: left;
+			box-sizing: border-box;
+
+			&-error {
+				color: #ed4014;
+			}
+		}
+        
+        &-logo {
+			position: absolute;
+			.properties(right, 12);
+			.properties(top, 10);
+			.properties(width, 20);
+			.properties(height, 20);
+
+			img {
+                width: 100%;
+                height: 100%;
+				.border-radius-circle();
+			}
+		}
+    }
+}
+
+@keyframes mi-anim-wait {
+    60% {
+        -moz-transform: scale(0.75);
+        -ms-transform: scale(0.75);
+        -webkit-transform: scale(0.75);
+        transform: scale(0.75);
+    }
+}
