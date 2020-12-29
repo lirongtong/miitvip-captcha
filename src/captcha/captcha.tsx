@@ -95,8 +95,15 @@ export default defineComponent({
             ) : null
         },
         getRadarScanElem() {
+            const borderColor = this.themeColor ? `${this.themeColor} transparent ${this.themeColor} transparent` : null
+            const borderColor2 = this.themeColor ? `transparent ${this.themeColor} transparent ${this.themeColor}` : null
             return this.status.scanning ? (
-                <div class={`${this.prefixCls}-radar-scan`}></div>
+                <div class={`${this.prefixCls}-radar-scan`}>
+                    <div class="double-ring">
+                        <div style={{borderColor}}></div>
+                        <div style={{borderColor: borderColor2}}></div>
+                    </div>
+                </div>
             ) : null
         },
         getRadarTipElem() {
