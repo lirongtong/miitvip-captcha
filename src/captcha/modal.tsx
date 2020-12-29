@@ -132,7 +132,12 @@ export default defineComponent({
                 </div>
             )
         },
-        getPanelActionElem() {},
+        getPanelActionElem() {
+            const panelActionCls = `${this.prefixCls}-panel-action`
+            return (
+                <div class={panelActionCls}></div>
+            )
+        },
         getPanelCopyrightElem() {
             const copyrightCls = `${this.prefixCls}-copyright`
             return (

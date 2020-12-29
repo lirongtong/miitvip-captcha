@@ -253,22 +253,55 @@
 
         &-panel {
 			position: relative;
-			border-top: 1px solid #4c4c4c;
-			width: 100%;
+            border-top: 1px solid fade(#1d1e23, 10%);
+            box-shadow: 0 0 2px fade(#fff, 30%);
 			.properties(height, 50);
 			.properties(padding-left, 12);
 			.properties(padding-right, 12);
 			.flex(center, space-between);
 
 			&-action{
-				.flex();
+                .flex();
+
+                &-close {
+                    .properties(width, 20);
+                    .properties(height, 20);
+                    background-color: #fff;
+                    .border-radius-circle();
+                    .flex();
+                    transition: all .4s cubic-bezier(.215, .61, .355,1);
+                    box-shadow: 0px 0px 30px 0px fade(#f6ca9d, 50%);
+
+                    & > span {
+                        background-color: #f6ca9d;
+                        display: block;
+                        height: 12px;
+                        border-radius: 6px;
+                        position: relative;
+                        transition: all .4s cubic-bezier(.215, .61, .355,1);
+                        position: absolute;
+                        top: 50%;
+                        margin-top: -6px;
+                        left: 18px;
+                        width: 4px;
+                        display: -webkit-box;
+                        display: -moz-box;
+                        display: -ms-flexbox;
+                        display: -webkit-flex;
+                        display: flex;
+                        -webkit-justify-content: space-between;
+                        justify-content: space-between;
+                        -moz-justify-content: space-between;
+                        -ms-justify-content: space-between;
+                    }
+                }
 			}
         }
         
         &-copyright {
 			.properties(font-size, 12);
 			.properties(line-height, 16);
-			color: #fff;
+            color: #fff;
 			.letter-spacing();
 
 			&-text {
