@@ -1,5 +1,6 @@
 import { defineComponent, Teleport } from 'vue'
 import axios from 'axios'
+import CaptchaModal from './modal'
 import PropTypes from '../utils/props'
 import tools from '../utils/tools'
 
@@ -16,8 +17,14 @@ export default defineComponent({
         boxShadow: PropTypes.bool.def(true),
         boxShadowColor: PropTypes.string.def('#f6ca9d'),
         boxShadowBlur: PropTypes.number.def(4),
+        modalBgColor: PropTypes.string,
+        modalBoxShadow: PropTypes.bool.def(true),
+        modalBoxShadowColor: PropTypes.string,
+        modalBoxShadowBlur: PropTypes.number,
         image: PropTypes.string,
         logo: PropTypes.string,
+        mask: PropTypes.bool.def(true),
+        maskClosable: PropTypes.bool.def(true),
         maxTries: PropTypes.number.def(5),
         initAction: PropTypes.string,
         initParams: PropTypes.object.def({}),
@@ -53,8 +60,8 @@ export default defineComponent({
                 success: false
             },
             offset: {
-                top: 20,
-                left: 38
+                top: 22.5,
+                left: 48
             },
             modal: {
                 show: false,
@@ -86,7 +93,7 @@ export default defineComponent({
                 this.tip = '点击按钮进行验证'
             }
         },
-        showCaptcha() {
+        showCaptchaModal() {
             if (!this.init || this.status.success) return
             this.tip = '智能检测中 ...'
             this.status.ready = false
@@ -101,6 +108,9 @@ export default defineComponent({
                     this.initCaptchaModal()
                 })
             } else this.initCaptchaModal()
+        },
+        closeCaptchaModal(data: any) {
+            if (data === 'close') this.modal.show = false
         },
         initCaptchaModal(image?: string) {
             image = image ?? this.image
@@ -202,10 +212,25 @@ export default defineComponent({
         const height = tools.isNumber(this.height) ? tools.pxToRem(this.height) : null
         const style = {width: `${width}rem`, height: `${height}rem`}
         const modal = this.modal.show || this.modal._instance ? (
-            <Teleport to={document.body} ref={this.saveCaptchaModal}></Teleport>
+            <Teleport to={document.body} ref={this.saveCaptchaModal}>
+                <CaptchaModal
+                    position={this.modal.position}
+                    maxTries={this.maxTries}
+                    show={this.modal.show}
+                    mask={this.mask}
+                    maskClosable={this.maskClosable}
+                    boxShadow={this.modalBoxShadow}
+                    boxShadowBlur={this.modalBoxShadowBlur}
+                    boxShadowColor={this.modalBoxShadowColor}
+                    themeColor={this.themeColor}
+                    bgColor={this.modalBgColor}
+                    onModalClose={this.closeCaptchaModal}
+                    image={this.image}>
+                </CaptchaModal>
+            </Teleport>
         ) : null
         return (
-            <div class={cls} onClick={this.showCaptcha} ref={this.prefixCls}>
+            <div class={cls} onClick={this.showCaptchaModal} ref={this.prefixCls}>
                 <div class={`${this.prefixCls}-content`} style={style}>
                     { this.getRadarElem() }
                 </div>
