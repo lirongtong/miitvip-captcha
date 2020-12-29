@@ -1,6 +1,6 @@
 <template>
     <div class="mi-captchas">
-        <mi-captcha></mi-captcha>
+        <mi-captcha image="./bg.jpg"></mi-captcha>
     </div>
 </template>
 

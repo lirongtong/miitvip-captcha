@@ -1,4 +1,4 @@
-import { defineComponent } from 'vue'
+import { defineComponent, Teleport } from 'vue'
 import axios from 'axios'
 import PropTypes from '../utils/props'
 import tools from '../utils/tools'
@@ -7,7 +7,7 @@ export default defineComponent({
     name: 'MiCaptcha',
     props: {
         width: PropTypes.number.def(320),
-        height: PropTypes.number.def(42),
+        height: PropTypes.number,
         radius: PropTypes.number.def(4),
         themeColor: PropTypes.string,
         bgColor: PropTypes.string,
@@ -22,8 +22,11 @@ export default defineComponent({
         initAction: PropTypes.string,
         initParams: PropTypes.object.def({}),
         verifyAction: PropTypes.string,
+        checkAction: PropTypes.string,
+        checkParams: PropTypes.object.def({}),
         onSuccess: PropTypes.func,
-        onInit: PropTypes.func
+        onInit: PropTypes.func,
+        onChecked: PropTypes.func
     },
     computed: {
         getThemeColorStyle() {
@@ -41,12 +44,22 @@ export default defineComponent({
             powered: 'Powered By makeit.vip',
             init: false,
             failed: false,
+            pass: false,
             tip: this.initAction ? '正在初始化验证码 ...' : '点击按钮进行验证',
             status: {
                 ready: true,
                 scanning: false,
                 being: false,
                 success: false
+            },
+            offset: {
+                top: 20,
+                left: 38
+            },
+            modal: {
+                show: false,
+                position: {},
+                _instance: null
             }
         }
     },
@@ -78,6 +91,34 @@ export default defineComponent({
             this.tip = '智能检测中 ...'
             this.status.ready = false
             this.status.scanning = true
+            if (this.checkAction) {
+                axios.post(this.checkAction, this.checkParams).then((res: any) => {
+                    if (res.data.pass) this.pass = true
+                    else this.initCaptchaModal()
+                    this.$emit('checked', res.data)
+                }).catch(() => {
+                    this.pass = false
+                    this.initCaptchaModal()
+                })
+            } else this.initCaptchaModal()
+        },
+        initCaptchaModal(image?: string) {
+            image = image ?? this.image
+            this.status.scanning = false
+            this.status.being = true
+            this.modal.position = this.getCaptchaModalPosition()
+            this.modal.show = true
+            this.tip = '请移动滑块，完成验证'
+        },
+        getCaptchaModalPosition() {
+            const elem = this.$refs[this.prefixCls]
+            const rect = elem.getBoundingClientRect()
+            const top = Math.round(rect.top * 1000) / 1000 + this.offset.top
+            const left = Math.round(rect.left * 1000) / 1000 + this.offset.left
+            return { top, left }
+        },
+        saveCaptchaModal(elem: any) {
+            this.modal._instance = elem
         },
         getRadarReadyElem() {
             return this.status.ready ? (
@@ -106,9 +147,15 @@ export default defineComponent({
                 </div>
             ) : null
         },
+        getRadarBeingElem() {
+            return this.status.being ? (
+                <div class={`${this.prefixCls}-radar-being`}>...</div>
+            ) : null
+        },
         getRadarTipElem() {
             const cls =  `${this.prefixCls}-radar-tip${this.failed ? ` ${this.prefixCls}-radar-tip-error` : ''}`
-            return <div class={cls} innerHTML={this.tip}></div>
+            const style = {height: this.height ? `${tools.pxToRem(this.height)}rem` : null}
+            return <div class={cls} style={style} innerHTML={this.tip}></div>
         },
         getRadarLogoElem() {
             return (
@@ -136,6 +183,7 @@ export default defineComponent({
                 <div class={cls} style={style}>
                     { this.getRadarReadyElem() }
                     { this.getRadarScanElem() }
+                    { this.getRadarBeingElem() }
                     { this.getRadarTipElem() }
                     { this.getRadarLogoElem() }
                 </div>
@@ -153,11 +201,15 @@ export default defineComponent({
         const width = tools.isNumber(this.width) ? tools.pxToRem(this.width) : null
         const height = tools.isNumber(this.height) ? tools.pxToRem(this.height) : null
         const style = {width: `${width}rem`, height: `${height}rem`}
+        const modal = this.modal.show || this.modal._instance ? (
+            <Teleport to={document.body} ref={this.saveCaptchaModal}></Teleport>
+        ) : null
         return (
             <div class={cls} onClick={this.showCaptcha} ref={this.prefixCls}>
                 <div class={`${this.prefixCls}-content`} style={style}>
                     { this.getRadarElem() }
                 </div>
+                { modal }
             </div>
         )
     }

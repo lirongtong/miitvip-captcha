@@ -62,9 +62,7 @@
     }
 
     &-radar {
-        position: absolute;
-		left: 0;
-		top: 0;
+        .flex(center, flex-start);
 		height: 100%;
         width: 100%;
         background: #fff;
@@ -76,7 +74,9 @@
 		&-scan,
 		&-being,
 		&-success {
-			position: absolute;
+            .flex();
+            flex-wrap: nowrap;
+            position: relative;
 			transition: all .5s ease;
 			.properties(width, 30);
 			.properties(height, 30);
@@ -139,16 +139,20 @@
             }
         }
 
+        &-being {
+            display: block;
+            .properties(font-size, 22);
+            .properties(line-height, 20);
+            font-weight: 700;
+            color: fade(#000, 50%);
+            text-align: center;
+        }
+
         &-tip {
-			position: absolute;
-			left: 0;
-			top: 0;
-			width: 100%;
+            .flex(center, flex-start);
 			.properties(height, 42);
-			.properties(padding-left, 48);
-			.properties(padding-right, 48);
+			.properties(padding-left, 2);
 			.properties(font-size, @mi-font-size-normal);
-			.properties(line-height, 42);
 			color: #1d1e23;
 			.text-ellipsis();
 			text-align: left;
@@ -160,9 +164,8 @@
 		}
         
         &-logo {
-			position: absolute;
-			.properties(right, 12);
-			.properties(top, 10);
+            position: absolute;
+            .properties(right);
 			.properties(width, 20);
 			.properties(height, 20);
 
