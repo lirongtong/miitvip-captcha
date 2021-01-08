@@ -3,6 +3,19 @@ import { Tooltip } from 'makeit-tooltip'
 import PropTypes from '../utils/props'
 import tools from '../utils/tools'
 
+const prefixCls = 'mi-captcha-modal'
+const selectors = {
+    modal: prefixCls,
+    image: `${prefixCls}-image`,
+    block: `${prefixCls}-block`,
+    slider: `${prefixCls}-slider`,
+    mask: `${prefixCls}-mask`,
+    result: `${prefixCls}-result`,
+    content: `${prefixCls}-content`
+}
+
+const urlReg = /^((https|http|ftp|rtsp|mms)?:\/\/)(([0-9A-Za-z_!~*'().&=+$%-]+: )?[0-9A-Za-z_!~*'().&=+$%-]+@)?(([0-9]{1,3}.){3}[0-9]{1,3}|([0-9A-Za-z_!~*'()-]+.)*([0-9A-Za-z][0-9A-Za-z-]{0,61})?[0-9A-Za-z].[A-Za-z]{2,6})(:[0-9]{1,4})?((\/?)|(\/[0-9A-Za-z_!~*'().;?:@&=+$,%#-]+)+\/?)$/
+
 export default defineComponent({
     name: 'MiCaptchaModal',
     props: {
@@ -23,12 +36,32 @@ export default defineComponent({
         return {
             prefixCls: 'mi-captcha-modal',
             loading: true,
+            background: 'https://file.makeit.vip/MIIT/M00/00/00/ajRkHV7d0JOAJYSMAAFwUxGzMIc287.jpg',
             target: 'https://admin.makeit.vip/components/captcha',
             avatar: 'https://file.makeit.vip/MIIT/M00/00/00/ajRkHV_pUyOALE2LAAAtlj6Tt_s370.png',
             powered: 'Powered By makeit.vip',
+            ctx: {
+                image: null,
+                block: null,
+            },
+            elements: {
+                slider: null,
+                block: null
+            },
+            coordinate: {
+                x: 0,
+                y: 0,
+                offset: 6
+            },
             size: {
                 width: 260,
                 height: 160
+            },
+            block: {
+                size: 42,
+                radius: 8,
+                PI: Math.PI,
+                real: 0
             },
             drag: {
                 moving: false,
@@ -36,10 +69,232 @@ export default defineComponent({
                 originY: 0,
                 offset: 0
             },
-            check: {}
+            check: {},
+            _background: null
         }
     },
+    mounted() {
+        this.init()
+    },
     methods: {
+        init() {
+            this._background = this.image ?? this.background
+            this.initModal()
+        },
+        initModal() {
+            const slider = this.$refs[`${selectors.slider}-btn`]
+            const block = this.$refs[selectors.block]
+            this.elements = {slider, block}
+            this.block.real = this.block.size + this.block.radius * 2 + 2
+            this.setCheckData()
+            this.initCaptcha()
+        },
+        initCaptcha() {
+            const image = this.$refs[selectors.image]
+            const block = this.$refs[selectors.block]
+            const imageCtx = image ? image.getContext('2d') : null
+            const blockCtx = block ? block.getContext('2d') : null
+            this.ctx = {image: imageCtx, block: blockCtx}
+            /**
+             * 图片统一转为 base64, 避免跨域问题.
+             * 也可采用xhr异步请求图片地址.
+             * ```
+             * if (this.$g.regExp.url.test(this.background)) {
+             *     const xhr = new XMLHttpRequest();
+             *     xhr.onload = function() {
+             *         if (this.status === 200) {
+             *             // 注意 this 指向.
+             *             const url = URL.createObjectURL(this.response);
+             *             vm.background = url;
+             *             vm.initImageElem();
+             *             // ...
+             *             URL.revokeObjectURL(url);
+             *         }
+             *     }
+             *     xhr.open('GET', this.background, true);
+             *     xhr.responseType = 'blob';
+             *     xhr.send();
+             * } else {
+             *     this.initImageElem();
+             * }
+             * ```
+             */
+            if (urlReg.test(this._background)) this.imageToBase64(this.initImageElem)
+            else this.initImageElem()
+        },
+        initImage(elem: HTMLElement) {
+            if (
+                this.ctx.image &&
+                this.ctx.block
+            ) {
+                /** image */
+                this.ctx.image.drawImage(
+					elem,
+					0,
+					0,
+					this.size.width,
+					this.size.height
+                )
+                /** text */
+                this.ctx.image.beginPath()
+                this.ctx.image.fillStyle = '#FFF'
+				this.ctx.image.shadowColor = 'transparent'
+				this.ctx.image.shadowBlur = 0
+				this.ctx.image.font = 'bold 24px MicrosoftYaHei'
+				this.ctx.image.fillText('拖动滑块拼合图片', 12, 30)
+				this.ctx.image.font = '16px MicrosoftYaHei'
+				this.ctx.image.fillText('就能验证成功哦', 12, 55)
+                this.ctx.image.closePath()
+                /** block */
+                this.ctx.block.save()
+                this.ctx.block.globalCompositeOperation = 'destination-over'
+                this.drawBlockPosition()
+				this.ctx.block.drawImage(
+                    elem,
+                    0,
+                    0,
+                    this.size.width,
+                    this.size.height
+                )
+                /** image data */
+                const coordinateY = this.coordinate.y - this.block.radius * 2 + 1
+                const imageData = this.ctx.block.getImageData(
+                    this.coordinate.x,
+                    coordinateY,
+                    this.block.real,
+                    this.block.real
+                )
+                const block = this.$refs[selectors.block]
+                block.width = this.block.real
+                this.ctx.block.putImageData(
+                    imageData,
+                    this.coordinate.offset,
+                    coordinateY
+                )
+                this.ctx.block.restore()
+                this.loading = false
+            }
+        },
+        initImageElem() {
+            const elem = new Image()
+            elem.src = this._background
+            elem.onload = () => this.initImage(elem)
+        },
+        imageToBase64(callback: Function) {
+            const elem = new Image()
+            const canvas = document.createElement('canvas')
+            const ctx = canvas.getContext('2d')
+            canvas.width = this.size.width
+            canvas.height = this.size.height
+            elem.crossOrigin = ''
+            elem.src = this._background
+            elem.onload = () => {
+                ctx.drawImage(
+                    elem,
+                    0,
+                    0,
+                    this.size.width,
+                    this.size.height
+                )
+                this._background = canvas.toDataURL()
+                if (callback) callback.apply(this)
+            }
+        },
+        drawBlock(
+            ctx: CanvasRenderingContext2D,
+            direction: any = {},
+            operation: string
+        ) {
+            ctx.beginPath()
+            ctx.moveTo(this.coordinate.x, this.coordinate.y)
+            const direct = direction.direction
+            const type = direction.type
+            /** top */
+            if (direct === 'top') {
+                ctx.arc(
+                    this.coordinate.x + this.block.size / 2,
+                    this.coordinate.y,
+                    this.block.radius,
+                    -this.block.PI,
+                    0,
+                    type === 'inner'
+                )
+            }
+            ctx.lineTo(this.coordinate.x + this.block.size, this.coordinate.y)
+            /** right */
+            if (direct === 'right') {
+                ctx.arc(
+                    this.coordinate.x + this.block.size,
+                    this.coordinate.y + this.block.size / 2,
+                    this.block.radius,
+                    1.5 * this.block.PI,
+                    0.5 * this.block.PI,
+                    type === 'inner'
+                )
+            }
+            ctx.lineTo(this.coordinate.x + this.block.size, this.coordinate.y + this.block.size)
+            /** bottom */
+            ctx.arc(
+                this.coordinate.x + this.block.size / 2,
+                this.coordinate.y + this.block.size,
+                this.block.radius,
+                0,
+                this.block.PI,
+                true
+            )
+            ctx.lineTo(this.coordinate.x, this.coordinate.y + this.block.size)
+            /** left */
+            ctx.arc(
+                this.coordinate.x,
+                this.coordinate.y + this.block.size / 2,
+                this.block.radius,
+                0.5 * this.block.PI,
+                1.5 * this.block.PI,
+                true
+            )
+            ctx.lineTo(this.coordinate.x, this.coordinate.y)
+            ctx.shadowColor = 'rgba(0, 0, 0, .001)'
+            ctx.shadowBlur = 20
+            ctx.lineWidth = 1.5
+            ctx.fillStyle = 'rgba(0, 0, 0, .4)'
+            ctx.strokeStyle = 'rgba(255, 255, 255, .8)'
+            ctx.stroke()
+            ctx.closePath()
+            ctx[operation]()
+        },
+        drawBlockPosition() {
+            const x = tools.randomNumberInRange(
+                this.block.real + 20,
+                this.size.width - (this.block.real + 20)
+            )
+            const y = tools.randomNumberInRange(55, this.size.height - 55)
+            const direction = this.drawBlockDirection()
+            this.coordinate.x = x
+            this.coordinate.y = y
+            this.drawBlock(this.ctx.image, direction, 'fill')
+            this.drawBlock(this.ctx.block, direction, 'clip')
+        },
+        drawBlockDirection() {
+            const direction = {top: 'top', right: 'right'}
+            const from = ['inner', 'outer']
+            const result: any = {}
+            const keys = Object.keys(direction)
+            const key = keys[Math.floor(Math.random() * keys.length)]
+            result.direction = direction[key]
+            result.type = from[Math.floor(Math.random() * from.length)]
+            return result
+        },
+        setCheckData() {
+            this.check = {
+                tries: this.tries ?? 5,
+                num: 0,
+                being: false,
+                value: null,
+                correct: false,
+                tip: '拖动滑块将悬浮图像正确拼合',
+                show: false
+            }
+        },
         closeModal() {
             if (this.maskClosable) this.$emit('modalClose', 'close')
         },
@@ -64,9 +319,9 @@ export default defineComponent({
         },
         getMaskElem() {
             return this.mask && this.show ? (
-                <div class={`${this.prefixCls}-mask`}
+                <div class={`${selectors.mask}`}
                     onClick={this.closeModal}
-                    ref={`${this.prefixCls}-mask`}>
+                    ref={`${selectors.mask}`}>
                 </div>
             ) : null
         },
@@ -96,23 +351,22 @@ export default defineComponent({
                     <canvas
                         width={this.size.width}
                         height={this.size.height}
-                        ref={`${this.prefixCls}-image`}>
+                        ref={`${selectors.image}`}>
                     </canvas>
                     <canvas
                         width={this.size.width}
                         height={this.size.height}
-                        ref={`${this.prefixCls}-block`}>
+                        ref={`${selectors.block}`}>
                     </canvas>
                 </div>
             )
         },
         getContentResultElem() {
-            const resultCls = `${this.prefixCls}-result`
-            const cls = `${resultCls} ${this.check.correct ? `${resultCls}-success` : `${resultCls}-error`}`
-            return <div class={cls} ref={resultCls} innerHTML={this.check.tip}></div>
+            const cls = `${selectors.result} ${this.check.correct ? `${selectors.result}-success` : `${selectors.result}-error`}`
+            return <div class={cls} ref={selectors.result} innerHTML={this.check.tip}></div>
         },
         getSliderTrackElem() {
-            const sliderTrackCls = `${this.prefixCls}-slider-track`
+            const sliderTrackCls = `${selectors.slider}-track`
             const style = {borderColor: this.themeColor ?? null}
             return (
                 <div class={sliderTrackCls} style={style}>
@@ -121,7 +375,7 @@ export default defineComponent({
             )
         },
         getSliderBtnElem() {
-            const sliderBtnCls = `${this.prefixCls}-slider-btn`
+            const sliderBtnCls = `${selectors.slider}-btn`
             const style = {borderColor: this.themeColor ?? null}
             return (
                 <div class={sliderBtnCls} style={style} ref={sliderBtnCls}>
@@ -164,22 +418,20 @@ export default defineComponent({
             )
         },
         getContentElem() {
-            const contentCls = `${this.prefixCls}-content`
-            const sliderCls = `${this.prefixCls}-slider`
             const style = {
                 borderColor: this.themeColor ?? null,
                 background: this.bgColor ?? null,
                 boxShadow: this.boxShadow ? `0 0 ${tools.pxToRem(this.boxShadowBlur)}rem ${this.boxShadowColor}` : null,
             }
             return (
-                <div class={contentCls} style={style} ref={contentCls}>
+                <div class={selectors.content} style={style} ref={selectors.content}>
                     <div class={`${this.prefixCls}-wrap`}>
                         <div class={`${this.prefixCls}-embed`}>
                             { this.getContentLoadingElem() }
                             { this.getContentInfoElem() }
                             { this.getContentResultElem() }
                         </div>
-                        <div class={`${sliderCls}${this.drag.moving ? ` ${sliderCls}-moving` : ''}`} ref={sliderCls}>
+                        <div class={`${selectors.slider}${this.drag.moving ? ` ${selectors.slider}-moving` : ''}`} ref={selectors.slider}>
                             { this.getSliderTrackElem() }
                             { this.getSliderBtnElem() }
                         </div>

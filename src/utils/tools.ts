@@ -31,6 +31,16 @@ class MiTools {
     pxToRem(value: number) {
         return Math.round(value / 16 * 100) / 100
     }
+
+    /**
+     * Generate a random number within the specified range.
+     * @param start
+     * @param end
+     * @returns {number}
+     */
+    randomNumberInRange(start: number, end: number): number {
+        return Math.round(Math.random() * (end - start) + start)
+    }
 }
 
 export default new MiTools()
