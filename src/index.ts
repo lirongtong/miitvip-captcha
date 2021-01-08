@@ -6,6 +6,8 @@ const install = (app: App) => {
     return app
 }
 
+export { Captcha }
+
 export default {
     version: `${process.env.VERSION}`,
     install
