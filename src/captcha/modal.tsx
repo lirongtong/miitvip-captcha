@@ -64,8 +64,7 @@ export default defineComponent({
         },
         getMaskElem() {
             return this.mask && this.show ? (
-                <div
-                    class={`${this.prefixCls}-mask`}
+                <div class={`${this.prefixCls}-mask`}
                     onClick={this.closeModal}
                     ref={`${this.prefixCls}-mask`}>
                 </div>
@@ -138,13 +137,13 @@ export default defineComponent({
             return (
                 <div class={panelActionCls}>
                     <Tooltip title="关闭验证" autoAdjust={false} bgColor={this.themeColor}>
-                        <i class="mi-icon icon-close"></i>
+                        <i class="mi-icon icon-close" onClick={this.closeModal}></i>
                     </Tooltip>
                     <Tooltip title="刷新验证" autoAdjust={false} bgColor={this.themeColor}>
                         <i class="mi-icon icon-refresh"></i>
                     </Tooltip>
                     <Tooltip title="帮助反馈" autoAdjust={false} bgColor={this.themeColor}>
-                        <a href="https://admin.makeit.vip/components/captcha" target="_blank">
+                        <a href={this.target} target="_blank">
                             <i class="mi-icon icon-question"></i>
                         </a>
                     </Tooltip>
