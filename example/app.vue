@@ -1,5 +1,6 @@
 <template>
     <div class="mi-captchas">
+        <mi-captcha image="./bg.jpg"></mi-captcha>
         <mi-captcha image="./bg.jpg" theme-color="#2F9688" border-color="#2F9688" box-shadow-color="#2F9688"></mi-captcha>
     </div>
 </template>

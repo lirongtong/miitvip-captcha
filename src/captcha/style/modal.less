@@ -6,7 +6,7 @@
 		animation-fill-mode: forwards;
         animation-timing-function: cubic-bezier(0.6, 0, 0.4, 1);
         .letter-spacing();
-        z-index: 1100;
+        z-index: 1000;
         
         &-mask {
             position: fixed;
@@ -262,6 +262,16 @@
 
 			&-action{
                 .flex();
+
+                .@{mi-icon} {
+                    color: #fff;
+                    .properties(margin-right, 12);
+                    cursor: pointer;
+
+                    &:last-child {
+                        margin-right: 0
+                    }
+                }
 
                 &-close {
                     .properties(width, 20);

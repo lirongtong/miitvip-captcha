@@ -1,4 +1,5 @@
 import { defineComponent } from 'vue'
+import { Tooltip } from 'makeit-tooltip'
 import PropTypes from '../utils/props'
 import tools from '../utils/tools'
 
@@ -135,7 +136,19 @@ export default defineComponent({
         getPanelActionElem() {
             const panelActionCls = `${this.prefixCls}-panel-action`
             return (
-                <div class={panelActionCls}></div>
+                <div class={panelActionCls}>
+                    <Tooltip title="关闭验证" autoAdjust={false} bgColor={this.themeColor}>
+                        <i class="mi-icon icon-close"></i>
+                    </Tooltip>
+                    <Tooltip title="刷新验证" autoAdjust={false} bgColor={this.themeColor}>
+                        <i class="mi-icon icon-refresh"></i>
+                    </Tooltip>
+                    <Tooltip title="帮助反馈" autoAdjust={false} bgColor={this.themeColor}>
+                        <a href="https://admin.makeit.vip/components/captcha" target="_blank">
+                            <i class="mi-icon icon-question"></i>
+                        </a>
+                    </Tooltip>
+                </div>
             )
         },
         getPanelCopyrightElem() {
