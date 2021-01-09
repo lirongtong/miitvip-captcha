@@ -54,6 +54,7 @@ export default defineComponent({
             failed: false,
             pass: false,
             tip: this.initAction ? '正在初始化验证码 ...' : '点击按钮进行验证',
+            msgTimer: null,
             status: {
                 ready: true,
                 scanning: false,
@@ -114,6 +115,10 @@ export default defineComponent({
             if (data) {
                 if (data.status === 'close') this.reset()
                 if (data.status === 'success') this.success()
+                if (data.status === 'frequently') {
+                    this.reset()
+                    this.showMessage(`已连续错误达 ${this.maxTries} 次，请稍候再试`, 5)
+                }
             }
         },
         initCaptchaModal(image?: string) {
@@ -123,6 +128,20 @@ export default defineComponent({
             this.modal.position = this.getCaptchaModalPosition()
             this.modal.show = true
             this.tip = '请移动滑块，完成验证'
+        },
+        showMessage(msg = '错误提示', duration = 3) {
+            const name = 'mi-captcha-message'
+            const exist = document.getElementById(name)
+            if (exist) exist.remove()
+            const elem = document.createElement('div')
+            elem.id = name
+            elem.className = name
+            elem.innerHTML = `<div class="${name}-content"><i class="mi-icon icon-close"></i><span>${msg}</span></div>`
+            document.body.appendChild(elem)
+            if (this.msgTimer) clearTimeout(this.msgTimer)
+            this.msgTimer = setTimeout(() => {
+                elem.remove()
+            }, duration * 1000)
         },
         success(data: any) {
             this.tip = '通过验证'
