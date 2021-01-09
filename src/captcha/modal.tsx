@@ -82,6 +82,14 @@ export default defineComponent({
             }
         }
     },
+    beforeUnmount() {
+        tools.off(this.elements.slider, 'pointerdown', this.dragStart)
+        tools.off(this.elements.slider, 'touchstart', this.dragStart)
+        tools.off(this.elements.slider, 'pointermove', this.dragMoving)
+        tools.off(this.elements.slider, 'touchmove', this.dragMoving)
+        tools.off(this.elements.slider, 'pointerup', this.dragEnd)
+        tools.off(this.elements.slider, 'touchend', this.dragEnd)
+    },
     mounted() {
         this.init()
     },
@@ -97,6 +105,12 @@ export default defineComponent({
             this.block.real = this.block.size + this.block.radius * 2 + 2
             this.setCheckData()
             this.initCaptcha()
+            tools.off(this.elements.slider, 'pointerdown', this.dragStart)
+            tools.off(this.elements.slider, 'touchstart', this.dragStart)
+            tools.off(this.elements.slider, 'pointermove', this.dragMoving)
+            tools.off(this.elements.slider, 'touchmove', this.dragMoving)
+            tools.off(this.elements.slider, 'pointerup', this.dragEnd)
+            tools.off(this.elements.slider, 'touchend', this.dragEnd)
         },
         refreshCaptcha() {
             this.loading = true
@@ -302,6 +316,9 @@ export default defineComponent({
             result.type = from[Math.floor(Math.random() * from.length)]
             return result
         },
+        dragStart() {},
+        dragMoving() {},
+        dragEnd() {},
         setCheckData() {
             this.check = {
                 tries: this.tries ?? 5,
