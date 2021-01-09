@@ -386,12 +386,15 @@ export default defineComponent({
                 }
                 if (this.verifyAction) {
                     await axios.post(this.verifyAction, this.verifyParams).then((res: any) => {
-                        if (res.ret.code === 1) {
+                        const response = res.data
+                        if (response.ret.code === 1) {
                             const taking = Math.round(((this.time.end - this.time.start) / 10)) / 100
                             this.check.tip = `${taking}s速度完成图片拼合验证`
                             this.check.correct = true
-                            succcess(res.data)
-                        } else error(res.ret.message)
+                            succcess(response.data)
+                        } else error(response.ret.message)
+                    }).catch((err: any) => {
+                        error(err.message)
                     })
                 } else succcess()
             } else error()
