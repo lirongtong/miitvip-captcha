@@ -73,6 +73,15 @@ export default defineComponent({
             _background: null
         }
     },
+    watch: {
+        show(value: boolean) {
+            if (value) {
+                this.$nextTick(() => {
+                    this.init()
+                })
+            }
+        }
+    },
     mounted() {
         this.init()
     },
@@ -88,6 +97,15 @@ export default defineComponent({
             this.block.real = this.block.size + this.block.radius * 2 + 2
             this.setCheckData()
             this.initCaptcha()
+        },
+        refreshCaptcha() {
+            this.loading = true
+            this.setCheckData()
+            const block = this.$refs[selectors.block]
+            block.width = this.size.width
+            this.ctx.image.clearRect(0, 0, this.size.width, this.size.height)
+            this.ctx.block.clearRect(0, 0, this.size.width, this.size.height)
+            this.initImageElem()
         },
         initCaptcha() {
             const image = this.$refs[selectors.image]
@@ -295,8 +313,13 @@ export default defineComponent({
                 show: false
             }
         },
-        closeModal() {
-            if (this.maskClosable) this.$emit('modalClose', 'close')
+        closeModal(status = 'close', data: any = {}) {
+            this.loading = true
+            if (typeof status !== 'string') status = 'close'
+            if (this.maskClosable) this.$emit('modalClose', {
+                status,
+                data
+            })
         },
         getArrowElem() {
             const arrowCls = `${this.prefixCls}-arrow`
@@ -394,7 +417,7 @@ export default defineComponent({
                         <i class="mi-icon icon-close" onClick={this.closeModal}></i>
                     </Tooltip>
                     <Tooltip title="刷新验证" autoAdjust={false} bgColor={this.themeColor}>
-                        <i class="mi-icon icon-refresh"></i>
+                        <i class="mi-icon icon-refresh" onClick={this.refreshCaptcha}></i>
                     </Tooltip>
                     <Tooltip title="帮助反馈" autoAdjust={false} bgColor={this.themeColor}>
                         <a href={this.target} target="_blank">

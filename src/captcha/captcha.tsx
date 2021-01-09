@@ -110,7 +110,10 @@ export default defineComponent({
             } else this.initCaptchaModal()
         },
         closeCaptchaModal(data: any) {
-            if (data === 'close') this.modal.show = false
+            if (data) {
+                if (data.status === 'close') this.reset()
+                if (data.status === 'success') this.success()
+            }
         },
         initCaptchaModal(image?: string) {
             image = image ?? this.image
@@ -119,6 +122,23 @@ export default defineComponent({
             this.modal.position = this.getCaptchaModalPosition()
             this.modal.show = true
             this.tip = '请移动滑块，完成验证'
+        },
+        success(data: any) {
+            this.tip = '通过验证'
+            this.$emit('success', data)
+            setTimeout(() => {
+                this.modal.show = false
+                this.status.being = false
+                this.status.success = true
+            })
+        },
+        reset() {
+            this.modal.show = false
+            this.status.being = false
+            this.status.success = false
+            this.status.scanning = false
+            this.status.ready = true
+            this.tip = '点击按钮进行验证'
         },
         getCaptchaModalPosition() {
             const elem = this.$refs[this.prefixCls]
