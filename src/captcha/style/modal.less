@@ -200,7 +200,11 @@
 					.flex(center, flex-start);
 					flex-wrap: nowrap;
 					opacity: 1;
-					transition: opacity .3s ease;
+                    transition: opacity .3s ease;
+                    
+                    &.hide {
+                        opacity: 0;
+                    }
 				}
             }
 

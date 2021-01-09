@@ -69,6 +69,10 @@ export default defineComponent({
                 originY: 0,
                 offset: 0
             },
+            time: {
+                start: null,
+                end: null
+            },
             check: {},
             _background: null
         }
@@ -105,12 +109,12 @@ export default defineComponent({
             this.block.real = this.block.size + this.block.radius * 2 + 2
             this.setCheckData()
             this.initCaptcha()
-            tools.off(this.elements.slider, 'pointerdown', this.dragStart)
-            tools.off(this.elements.slider, 'touchstart', this.dragStart)
-            tools.off(this.elements.slider, 'pointermove', this.dragMoving)
-            tools.off(this.elements.slider, 'touchmove', this.dragMoving)
-            tools.off(this.elements.slider, 'pointerup', this.dragEnd)
-            tools.off(this.elements.slider, 'touchend', this.dragEnd)
+            tools.on(this.elements.slider, 'pointerdown', this.dragStart)
+            tools.on(this.elements.slider, 'touchstart', this.dragStart)
+            tools.on(this.elements.slider, 'pointermove', this.dragMoving)
+            tools.on(this.elements.slider, 'touchmove', this.dragMoving)
+            tools.on(this.elements.slider, 'pointerup', this.dragEnd)
+            tools.on(this.elements.slider, 'touchend', this.dragEnd)
         },
         refreshCaptcha() {
             this.loading = true
@@ -316,9 +320,41 @@ export default defineComponent({
             result.type = from[Math.floor(Math.random() * from.length)]
             return result
         },
-        dragStart() {},
-        dragMoving() {},
-        dragEnd() {},
+        getBoundingClientRect(elem: HTMLElement, specific = null) {
+            const rect = elem.getBoundingClientRect()
+            if (specific && rect[specific]) return rect[specific]
+            return rect
+        },
+        dragStart(event: any) {
+            const x = event.clientX || event.touches[0].clientX
+            const sliderRef = this.$refs[selectors.slider]
+            const sliderBtnRef = this.$refs[`${selectors.slider}-btn`]
+            const sliderRect = this.getBoundingClientRect(sliderRef)
+            const sliderBtnRect = this.getBoundingClientRect(sliderBtnRef)
+            this.drag.originX = Math.round(sliderRect.left * 10) / 10
+            this.drag.originY = Math.round(sliderRect.top * 10) / 10
+            this.drag.offset = Math.round((x - sliderBtnRect.left) * 10) / 10
+            this.drag.moving = true
+            this.time.start = Date.now()
+        },
+        dragMoving(event: any) {
+            if (!this.drag.moving || this.check.being) return
+            const x = event.clientX || event.touches[0].clientX
+            const moveX = Math.round((x - this.drag.originX - this.drag.offset) * 10) / 10
+            if (moveX < 0 || moveX + 54 >= this.size.width) {
+                this.checkVerificationCode()
+                return false
+            }
+            this.elements.slider.style.left = `${moveX}px`
+            this.elements.block.style.left = `${moveX}px`
+            this.check.value = moveX
+        },
+        dragEnd() {
+            if (!this.drag.moving) return
+            this.time.end = Date.now()
+            this.checkVerificationCode()
+        },
+        checkVerificationCode() {},
         setCheckData() {
             this.check = {
                 tries: this.tries ?? 5,
@@ -410,7 +446,7 @@ export default defineComponent({
             const style = {borderColor: this.themeColor ?? null}
             return (
                 <div class={sliderTrackCls} style={style}>
-                    <span class={`${sliderTrackCls}-tip`}>拖动左边滑块完成上方拼图</span>
+                    <span class={`${sliderTrackCls}-tip${this.drag.moving ? ' hide' : ''}`}>拖动左边滑块完成上方拼图</span>
                 </div>
             )
         },
