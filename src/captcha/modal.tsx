@@ -381,7 +381,7 @@ export default defineComponent({
             ) {
                 const succcess = (data: any = {}) => {
                     setTimeout(() => {
-                        this.close('success', data)
+                        this.closeModal('success', data)
                     }, 600)
                 }
                 if (this.verifyAction) {
@@ -406,7 +406,7 @@ export default defineComponent({
             setTimeout(() => {
                 this.check.show = false
                 this.check.being = false
-                if (this.check.num >= this.check.tries) this.close('frequently')
+                if (this.check.num >= this.check.tries) this.closeModal('frequently')
             }, 1600)
         },
         setCheckData() {
