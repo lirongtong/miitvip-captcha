@@ -26,11 +26,12 @@ export default defineComponent({
         mask: PropTypes.bool.def(true),
         maskClosable: PropTypes.bool.def(true),
         maxTries: PropTypes.number.def(5),
-        initAction: PropTypes.string,
         initParams: PropTypes.object.def({}),
+        initAction: PropTypes.string,
+        verifyParams: PropTypes.object.def({}),
         verifyAction: PropTypes.string,
-        checkAction: PropTypes.string,
         checkParams: PropTypes.object.def({}),
+        checkAction: PropTypes.string,
         onSuccess: PropTypes.func,
         onInit: PropTypes.func,
         onChecked: PropTypes.func
@@ -244,6 +245,8 @@ export default defineComponent({
                     boxShadowColor={this.modalBoxShadowColor}
                     themeColor={this.themeColor}
                     bgColor={this.modalBgColor}
+                    verifyParams={this.verifyParams}
+                    verifyAction={this.verifyAction}
                     onModalClose={this.closeCaptchaModal}
                     image={this.image}>
                 </CaptchaModal>

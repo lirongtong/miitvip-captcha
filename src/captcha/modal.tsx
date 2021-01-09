@@ -1,4 +1,5 @@
 import { defineComponent } from 'vue'
+import axios from 'axios'
 import { Tooltip } from 'makeit-tooltip'
 import PropTypes from '../utils/props'
 import tools from '../utils/tools'
@@ -30,6 +31,8 @@ export default defineComponent({
         boxShadowColor: PropTypes.string,
         boxShadowBlur: PropTypes.number,
         maxTries: PropTypes.number.def(5),
+        verifyParams: PropTypes.object.def({}),
+        verifyAction: PropTypes.string,
         onModalClose: PropTypes.func
     },
     data() {
@@ -354,7 +357,58 @@ export default defineComponent({
             this.time.end = Date.now()
             this.checkVerificationCode()
         },
-        checkVerificationCode() {},
+        dragReset() {
+            this.elements.slider.style.left = 0
+            this.elements.block.style.left = 0
+            this.drag.originX = 0
+            this.drag.originY = 0
+        },
+        async checkVerificationCode() {
+            const coordinateX = Math.round(this.check.value + this.coordinate.offset)
+            if (this.check.being) return
+            this.check.being = true
+            const error = (msg = null) => {
+                setTimeout(() => {
+                    this.dragReset()
+                }, 1000)
+                this.check.num++
+                this.check.correct = false
+                if (msg) this.check.tip = msg
+            }
+            if (
+                this.coordinate.x - 1 <= coordinateX &&
+                this.coordinate.x + 1 >= coordinateX
+            ) {
+                const succcess = (data: any = {}) => {
+                    setTimeout(() => {
+                        this.close('success', data)
+                    }, 600)
+                }
+                if (this.verifyAction) {
+                    await axios.post(this.verifyAction, this.verifyParams).then((res: any) => {
+                        if (res.ret.code === 1) {
+                            const taking = Math.round(((this.time.end - this.time.start) / 10)) / 100
+                            this.check.tip = `${taking}s速度完成图片拼合验证`
+                            this.check.correct = true
+                            succcess(res.data)
+                        } else error(res.ret.message)
+                    }).catch((err: any) => {
+                        error(err.message)
+                    })
+                } else succcess()
+            } else error()
+            this.$refs[selectors.result].style.bottom = 0
+            if (this.check.num <= this.check.tries) this.check.show = true
+            setTimeout(() => {
+                this.drag.moving = false
+                this.$refs[selectors.result].style.bottom = '-32px'
+            }, 1000)
+            setTimeout(() => {
+                this.check.show = false
+                this.check.being = false
+                if (this.check.num >= this.check.tries) this.close('frequently')
+            }, 1600)
+        },
         setCheckData() {
             this.check = {
                 tries: this.tries ?? 5,
