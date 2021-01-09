@@ -392,8 +392,6 @@ export default defineComponent({
                             this.check.correct = true
                             succcess(res.data)
                         } else error(res.ret.message)
-                    }).catch((err: any) => {
-                        error(err.message)
                     })
                 } else succcess()
             } else error()
