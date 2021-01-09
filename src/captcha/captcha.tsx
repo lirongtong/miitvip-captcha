@@ -12,10 +12,10 @@ export default defineComponent({
         radius: PropTypes.number.def(4),
         themeColor: PropTypes.string,
         bgColor: PropTypes.string,
-        borderColor: PropTypes.string.def('#f6ca9d'),
+        borderColor: PropTypes.string,
         textColor: PropTypes.string,
         boxShadow: PropTypes.bool.def(true),
-        boxShadowColor: PropTypes.string.def('#f6ca9d'),
+        boxShadowColor: PropTypes.string,
         boxShadowBlur: PropTypes.number.def(4),
         modalBgColor: PropTypes.string,
         modalBoxShadow: PropTypes.bool.def(true),
@@ -205,13 +205,17 @@ export default defineComponent({
         getRadarSuccessElem() {
             return this.status.success ? (
                 <div class={`${this.prefixCls}-radar-success ${this.prefixCls}-radar-success-icon`}>
-                    <i class="mi-icon icon-security" />
+                    <i class="mi-icon icon-security" style={{color: this.themeColor ?? null}} />
                 </div>
             ) : null
         },
         getRadarTipElem() {
-            const cls =  `${this.prefixCls}-radar-tip${this.failed ? ` ${this.prefixCls}-radar-tip-error` : ''}`
-            const style = {height: this.height ? `${tools.pxToRem(this.height)}rem` : null}
+            const error = this.failed ? ` ${this.prefixCls}-radar-tip-error` : ''
+            const cls =  `${this.prefixCls}-radar-tip${error}`
+            const style = {
+                height: this.height ? `${tools.pxToRem(this.height)}rem` : null,
+                color: this.status.success && this.themeColor ? this.themeColor : null
+            }
             return <div class={cls} style={style} innerHTML={this.tip}></div>
         },
         getRadarLogoElem() {
@@ -224,6 +228,7 @@ export default defineComponent({
             )
         },
         getRadarElem() {
+            console.log(this.borderColor ?? this.themeColor ?? null)
             const cls = `${this.prefixCls}-radar${this.status.success
                 ? ` ${this.prefixCls}-radar-pass`
                 : ''}`
@@ -231,10 +236,11 @@ export default defineComponent({
                 borderRadius: this.radius
                     ? `${tools.pxToRem(this.radius)}rem`
                     : null,
-                borderColor: this.borderColor ?? null,
+                borderColor: this.borderColor ?? this.themeColor ?? null,
                 backgroundColor: this.bgColor ?? null,
-                boxShadow: this.boxShadow ? `0 0 ${tools.pxToRem(this.boxShadowBlur)}rem ${this.boxShadowColor}` : null,
-                background: this.image
+                boxShadow: this.boxShadow && (this.boxShadowColor || this.themeColor)
+                    ? `0 0 ${tools.pxToRem(this.boxShadowBlur)}rem ${this.boxShadowColor || this.themeColor}`
+                    : null
             }
             return (
                 <div class={cls} style={style}>
@@ -246,6 +252,25 @@ export default defineComponent({
                     { this.getRadarLogoElem() }
                 </div>
             )
+        },
+        getSuccessShowElem() {
+            const hex = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/
+            const rgb = /^(rgb|RGB)/
+            const cls = `${this.prefixCls}-success${this.status.success ? ` ${this.prefixCls}-success-show` : ''}`
+            let backgroundColor = this.themeColor ? (
+                hex.test(this.themeColor)
+                    ? tools.colorHexToRgba(this.themeColor, 0.2)
+                    : (rgb.test(this.themeColor) ? (
+                        tools.colorHexToRgba(tools.colorRgbToHex(this.themeColor), 0.2)
+                    ) : this.themeColor)
+            ) : null
+            if (backgroundColor === this.themeColor) console.log(2)
+            const style = {
+                borderRadius: this.radius ? `${this.radius}px` : null,
+                background: backgroundColor,
+                borderColor: this.themeColor ?? null
+            }
+            return (<div class={cls} style={style}></div>)
         },
         resetStatus() {
             this.status.being = false
@@ -280,9 +305,10 @@ export default defineComponent({
             </Teleport>
         ) : null
         return (
-            <div class={cls} onClick={this.showCaptchaModal} ref={this.prefixCls}>
+            <div class={cls} onClick={this.showCaptchaModal} ref={this.prefixCls} key={this.prefixCls}>
                 <div class={`${this.prefixCls}-content`} style={style}>
                     { this.getRadarElem() }
+                    { this.getSuccessShowElem() }
                 </div>
                 { modal }
             </div>

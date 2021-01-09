@@ -29,7 +29,7 @@ export default defineComponent({
         bgColor: PropTypes.string,
         boxShadow: PropTypes.bool.def(true),
         boxShadowColor: PropTypes.string,
-        boxShadowBlur: PropTypes.number,
+        boxShadowBlur: PropTypes.number.def(6),
         maxTries: PropTypes.number.def(5),
         verifyParams: PropTypes.object.def({}),
         verifyAction: PropTypes.string,
@@ -398,11 +398,12 @@ export default defineComponent({
                     })
                 } else succcess()
             } else error()
-            this.$refs[selectors.result].style.bottom = 0
+            const result = this.$refs[selectors.result]
+            if (result) result.style.bottom = 0
             if (this.check.num <= this.check.tries) this.check.show = true
             setTimeout(() => {
                 this.drag.moving = false
-                this.$refs[selectors.result].style.bottom = '-32px'
+                if (result) result.style.bottom = '-32px'
             }, 1000)
             setTimeout(() => {
                 this.check.show = false
@@ -510,9 +511,9 @@ export default defineComponent({
             const style = {borderColor: this.themeColor ?? null}
             return (
                 <div class={sliderBtnCls} style={style} ref={sliderBtnCls}>
-                    <div class={`${sliderBtnCls}-icon`}>
+                    <div class={`${sliderBtnCls}-icon`} style={style}>
                         <div class={`${sliderBtnCls}-vertical`}></div>
-                        <div class={`${sliderBtnCls}-horizontal`}></div>
+                        <div class={`${sliderBtnCls}-horizontal`} style={{background: this.themeColor ?? null}}></div>
                     </div>
                 </div>
             )
@@ -552,7 +553,9 @@ export default defineComponent({
             const style = {
                 borderColor: this.themeColor ?? null,
                 background: this.bgColor ?? null,
-                boxShadow: this.boxShadow ? `0 0 ${tools.pxToRem(this.boxShadowBlur)}rem ${this.boxShadowColor}` : null,
+                boxShadow: this.boxShadow && (this.boxShadowColor || this.themeColor)
+                    ? `0 0 ${tools.pxToRem(this.boxShadowBlur)}rem ${this.boxShadowColor || this.themeColor}`
+                    : null,
             }
             return (
                 <div class={selectors.content} style={style} ref={selectors.content}>

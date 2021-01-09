@@ -75,7 +75,8 @@ img {
 		height: 100%;
         width: 100%;
         background: #fff;
-        border: 1px solid fade(#1d1e23, 20%);
+        border: 1px solid #f6ca9d;
+        box-shadow: 0 0 4px #f6ca9d;
         cursor: pointer;
         .properties(min-width, 160);
 
@@ -204,6 +205,22 @@ img {
 		}
     }
 
+    &-success {
+		position: absolute;
+		right: 0;
+		top: 0;
+		height: 100%;
+        width: 0;
+        box-shadow: 0 0 4px fade(#f6ca9d, 20%);
+		cursor: default;
+		transition: width .5s ease;
+
+		&-show{
+			background: fade(#f6ca9d, 20%);
+			width: 100%;
+		}
+	}
+
     &-message {
         position: absolute;
         top: 20px;
@@ -267,6 +284,23 @@ img {
 		-o-transform: scale3d(1, 1, 1);
 		-ms-transform: scale3d(1, 1, 1);
 		transform: scale3d(1, 1, 1);
+	}
+}
+
+@keyframes mi-captcha-success {
+	25% {
+		-o-transform: (25deg);
+		-moz-transform: rotate(25deg);
+		-ms-transform: rotate(25deg);
+		-webkit-transform: rotate(25deg);
+		transform: rotate(25deg)
+	}
+	100% {
+		-o-transform: rotate(-360deg);
+		-moz-transform: rotate(-360deg);
+		-ms-transform: rotate(-360deg);
+		-webkit-transform: rotate(-360deg);
+		transform: rotate(-360deg)
 	}
 }
 
