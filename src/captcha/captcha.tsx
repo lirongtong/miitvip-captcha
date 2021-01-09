@@ -202,6 +202,13 @@ export default defineComponent({
                 <div class={`${this.prefixCls}-radar-being`}>...</div>
             ) : null
         },
+        getRadarSuccessElem() {
+            return this.status.success ? (
+                <div class={`${this.prefixCls}-radar-success ${this.prefixCls}-radar-success-icon`}>
+                    <i class="mi-icon icon-security" />
+                </div>
+            ) : null
+        },
         getRadarTipElem() {
             const cls =  `${this.prefixCls}-radar-tip${this.failed ? ` ${this.prefixCls}-radar-tip-error` : ''}`
             const style = {height: this.height ? `${tools.pxToRem(this.height)}rem` : null}
@@ -218,7 +225,7 @@ export default defineComponent({
         },
         getRadarElem() {
             const cls = `${this.prefixCls}-radar${this.status.success
-                ? `${this.prefixCls}-radar-pass`
+                ? ` ${this.prefixCls}-radar-pass`
                 : ''}`
             const style = {
                 borderRadius: this.radius
@@ -234,6 +241,7 @@ export default defineComponent({
                     { this.getRadarReadyElem() }
                     { this.getRadarScanElem() }
                     { this.getRadarBeingElem() }
+                    { this.getRadarSuccessElem() }
                     { this.getRadarTipElem() }
                     { this.getRadarLogoElem() }
                 </div>

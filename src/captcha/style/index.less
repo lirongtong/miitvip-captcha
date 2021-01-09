@@ -157,6 +157,24 @@ img {
             text-align: center;
         }
 
+        &-success {
+			.flex();
+			cursor: default;
+
+			.@{mi-icon} {
+				color: #f6ca9d;
+				.properties(font-size, 18);
+			}
+
+			&-icon {
+				animation-name: mi-captcha-success;
+				animation-timing-function: ease;
+				animation-iteration-count: 1;
+				animation-delay: .5s;
+				animation-duration: .5s;
+			}
+		}
+
         &-tip {
             .flex(center, flex-start);
 			.properties(height, 42);
