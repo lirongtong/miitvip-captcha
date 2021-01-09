@@ -384,19 +384,22 @@ export default defineComponent({
                         this.closeModal('success', data)
                     }, 600)
                 }
+                const taking = Math.round(((this.time.end - this.time.start) / 10)) / 100
+                this.check.tip = `${taking}s速度完成图片拼合验证`
                 if (this.verifyAction) {
                     await axios.post(this.verifyAction, this.verifyParams).then((res: any) => {
                         const response = res.data
                         if (response.ret.code === 1) {
-                            const taking = Math.round(((this.time.end - this.time.start) / 10)) / 100
-                            this.check.tip = `${taking}s速度完成图片拼合验证`
                             this.check.correct = true
                             succcess(response.data)
                         } else error(response.ret.message)
                     }).catch((err: any) => {
                         error(err.message)
                     })
-                } else succcess()
+                } else {
+                    this.check.correct = true
+                    succcess()
+                }
             } else error()
             const result = this.$refs[selectors.result]
             if (result) result.style.bottom = 0

@@ -228,7 +228,6 @@ export default defineComponent({
             )
         },
         getRadarElem() {
-            console.log(this.borderColor ?? this.themeColor ?? null)
             const cls = `${this.prefixCls}-radar${this.status.success
                 ? ` ${this.prefixCls}-radar-pass`
                 : ''}`
@@ -264,7 +263,6 @@ export default defineComponent({
                         tools.colorHexToRgba(tools.colorRgbToHex(this.themeColor), 0.2)
                     ) : this.themeColor)
             ) : null
-            if (backgroundColor === this.themeColor) console.log(2)
             const style = {
                 borderRadius: this.radius ? `${this.radius}px` : null,
                 background: backgroundColor,
