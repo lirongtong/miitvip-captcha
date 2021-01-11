@@ -170,7 +170,7 @@ gulp.task('concat-css', (done) => {
 });
 
 gulp.task('minify-css', (done) => {
-    gulp.src([libDir + '/**/*.css'])
+    gulp.src([libDir + '/**/*.css', '../node_modules/makeit-tooltip/dist/tooltip.css'])
     .pipe(sourcemaps.init())
     .pipe(autoprefixer({
         overrideBrowserslist: ['last 2 versions', 'ie > 8']
