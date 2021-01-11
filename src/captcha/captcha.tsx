@@ -219,8 +219,11 @@ export default defineComponent({
             return <div class={cls} style={style} innerHTML={this.tip}></div>
         },
         getRadarLogoElem() {
+            const height = this.height && this.height > 40 ? this.height : null
+            const top = Math.round((height - 20) / 2 * 100) / 100 - 3
+            const style = {top: height ? `${tools.pxToRem(top)}rem` : null}
             return (
-                <div class={`${this.prefixCls}-radar-logo`}>
+                <div class={`${this.prefixCls}-radar-logo`} style={style}>
                     <a href={this.target} target="_blank">
                         <img src={this.logo ?? this.avatar} alt={this.powered} />
                     </a>
