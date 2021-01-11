@@ -220,7 +220,7 @@ export default defineComponent({
         },
         getRadarLogoElem() {
             const height = this.height && this.height > 40 ? this.height : null
-            const top = Math.round((height - 20) / 2 * 100) / 100 - 3
+            const top = Math.round((height - 20) / 2 * 100) / 100 - 1
             const style = {top: height ? `${tools.pxToRem(top)}rem` : null}
             return (
                 <div class={`${this.prefixCls}-radar-logo`} style={style}>
