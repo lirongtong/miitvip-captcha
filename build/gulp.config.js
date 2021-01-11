@@ -21,6 +21,7 @@ const postcssConfig = require('../postcss.config');
 
 const libDir = '../lib';
 const esDir = '../es';
+const fontsDir = '../fonts/';
 const distDir = '../dist';
 const distName = 'captcha';
 
@@ -129,8 +130,34 @@ gulp.task('compile', gulp.series('compile-with-es', done => {
     });
 }));
 
+const fontSources = [
+    '../src/**/*.eot',
+    '../src/**/*.svg',
+    '../src/**/*.ttf',
+    '../src/**/*.woff',
+    '../src/**/*.woff2'
+];
+
+gulp.task('fonts', (done) => {
+    gulp.src('../src/captcha/fonts/*')
+    .pipe(gulp.dest(fontsDir));
+    done();
+});
+
+gulp.task('fonts-lib', (done) => {
+    gulp.src(fontSources)
+    .pipe(gulp.dest(libDir));
+    done();
+});
+
+gulp.task('fonts-es', (done) => {
+    gulp.src(fontSources)
+    .pipe(gulp.dest(esDir));
+    done();
+});
+
 gulp.task('concat-css', (done) => {
-    const stream = gulp.src([libDir + '/**/*.css'])
+    const stream = gulp.src([libDir + '/**/*.css', '../node_modules/makeit-tooltip/dist/tooltip.css'])
     .pipe(less())
     .pipe(sourcemaps.init())
     .pipe(autoprefixer({
@@ -155,4 +182,4 @@ gulp.task('minify-css', (done) => {
     done();
 });
 
-gulp.task('default', gulp.series('compile', gulp.parallel('concat-css', 'minify-css')));
+gulp.task('default', gulp.series('compile', gulp.parallel('concat-css', 'minify-css', 'fonts', 'fonts-lib', 'fonts-es')));
