@@ -240,9 +240,11 @@ export default defineComponent({
                     : null,
                 borderColor: this.borderColor ?? this.themeColor ?? null,
                 backgroundColor: this.bgColor ?? null,
-                boxShadow: this.boxShadow && (this.boxShadowColor || this.themeColor)
-                    ? `0 0 ${tools.pxToRem(this.boxShadowBlur)}rem ${this.boxShadowColor || this.themeColor}`
-                    : null
+                boxShadow: this.boxShadow
+                    ? this.boxShadowColor || this.themeColor
+                        ? `0 0 ${tools.pxToRem(this.boxShadowBlur)}rem ${this.boxShadowColor || this.themeColor}`
+                        : 'none'
+                    : 'none'
             }
             return (
                 <div class={cls} style={style}>
