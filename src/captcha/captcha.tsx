@@ -7,7 +7,7 @@ import tools from '../utils/tools'
 export default defineComponent({
     name: 'MiCaptcha',
     props: {
-        width: PropTypes.number.def(320),
+        width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).def(320),
         height: PropTypes.number,
         radius: PropTypes.number.def(4),
         themeColor: PropTypes.string,
@@ -284,9 +284,17 @@ export default defineComponent({
     },
     render() {
         const cls = `${this.prefixCls}${tools.isMobile() ? ` ${this.prefixCls}-mobile` : ''}`
-        const width = tools.isNumber(this.width) ? tools.pxToRem(this.width) : null
-        const height = tools.isNumber(this.height) ? tools.pxToRem(this.height) : null
-        const style = {width: `${width}rem`, height: `${height}rem`}
+        const width = tools.isNumber(this.width)
+            ? `${tools.pxToRem(this.width)}rem`
+            : this.width ? (/%/g.test(this.width)
+                ? this.width
+                : `${tools.pxToRem(parseInt(this.width))}rem`) : null
+        const height = tools.isNumber(this.height)
+            ? `${tools.pxToRem(this.height)}rem`
+            : this.height ? (/%/g.test(this.height)
+                ? this.height : `${tools.pxToRem(this.height)}rem`)
+                : null
+        const style = {width, height}
         const modal = this.modal.show || this.modal._instance ? (
             <Teleport to={document.body} ref={this.saveCaptchaModal}>
                 <CaptchaModal
