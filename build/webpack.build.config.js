@@ -46,6 +46,12 @@ module.exports = merge(baseConfig, {
 				commonjs: 'axios',
 				commonjs2: 'axios',
 				amd: 'axios'
+			},
+			'@ant-design/icons-vue': {
+				root: '@AntDesign/IconsVue',
+				commonjs: '@ant-design/icons-vue',
+				commonjs2: '@ant-design/icons-vue',
+				amd: '@ant-design/icons-vue'
 			}
         }
     ],
