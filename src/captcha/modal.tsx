@@ -1,5 +1,6 @@
 import { defineComponent } from 'vue'
 import axios from 'axios'
+import { CloseCircleOutlined, ReloadOutlined, QuestionCircleOutlined } from '@ant-design/icons-vue'
 import { Tooltip } from 'makeit-tooltip'
 import PropTypes from '../utils/props'
 import tools from '../utils/tools'
@@ -526,14 +527,14 @@ export default defineComponent({
             return (
                 <div class={panelActionCls}>
                     <Tooltip title="关闭验证" autoAdjust={false} bgColor={this.themeColor}>
-                        <i class="mi-icon icon-close" onClick={this.closeModal}></i>
+                        <CloseCircleOutlined onClick={this.closeModal} />
                     </Tooltip>
                     <Tooltip title="刷新验证" autoAdjust={false} bgColor={this.themeColor}>
-                        <i class="mi-icon icon-refresh" onClick={this.refreshCaptcha}></i>
+                        <ReloadOutlined onClick={this.refreshCaptcha} />
                     </Tooltip>
                     <Tooltip title="帮助反馈" autoAdjust={false} bgColor={this.themeColor}>
                         <a href={this.target} target="_blank">
-                            <i class="mi-icon icon-question"></i>
+                            <QuestionCircleOutlined />
                         </a>
                     </Tooltip>
                 </div>

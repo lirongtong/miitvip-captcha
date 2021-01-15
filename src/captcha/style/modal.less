@@ -277,6 +277,24 @@
                     }
                 }
 
+                .anticon {
+                    .properties(font-size, 14);
+                    .properties(width, 14);
+                    .properties(height, 14);
+                    .properties(margin-right, 16);
+                    cursor: pointer;
+                    color: #fff;
+
+                    &:last-child {
+                        margin-right: 0;
+                    }
+                }
+
+                > a {
+                    .flex();
+                    .properties(height, 14);
+                }
+
                 &-close {
                     .properties(width, 20);
                     .properties(height, 20);
