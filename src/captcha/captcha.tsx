@@ -72,8 +72,13 @@ export default defineComponent({
             }
         }
     },
+    beforeUnmount() {
+        tools.off(window, 'resize', this.resize)
+        this.closeCaptchaModal({status: 'close'})
+    },
     mounted() {
         this.initCaptcha()
+        tools.on(window, 'resize', this.resize)
     },
     methods: {
         initCaptcha() {
@@ -159,6 +164,9 @@ export default defineComponent({
             this.status.scanning = false
             this.status.ready = true
             this.tip = '点击按钮进行验证'
+        },
+        resize() {
+            this.modal.position = this.getCaptchaModalPosition()
         },
         getCaptchaModalPosition() {
             const elem = this.$refs[this.prefixCls]
