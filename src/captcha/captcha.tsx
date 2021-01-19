@@ -1,5 +1,6 @@
 import { defineComponent, Teleport } from 'vue'
 import axios from 'axios'
+import { VerifiedOutlined } from '@ant-design/icons-vue'
 import CaptchaModal from './modal'
 import PropTypes from '../utils/props'
 import tools from '../utils/tools'
@@ -213,7 +214,7 @@ export default defineComponent({
         getRadarSuccessElem() {
             return this.status.success ? (
                 <div class={`${this.prefixCls}-radar-success ${this.prefixCls}-radar-success-icon`}>
-                    <i class="mi-icon icon-security" style={{color: this.themeColor ?? null}} />
+                    <VerifiedOutlined style={{fontSize: `${tools.pxToRem(20)}rem`, color: this.themeColor ?? null}} />
                 </div>
             ) : null
         },
