@@ -1,6 +1,6 @@
 {
     "name": "makeit-captcha",
-    "version": "1.1.8",
+    "version": "1.1.9",
     "author": {
         "url": "https://www.makeit.vip",
         "name": "lirongtong",
@@ -16,6 +16,9 @@
         "miitvip",
         "makeit.vip",
         "admin-captcha",
+        "component",
+        "makeit-component",
+        "vue-component",
         "麦可易特网"
     ],
     "description": "Makeit Captcha 滑块验证码组件，是基于 Vue3.0 + Vite + Canvas 开发，动态生成验证滑块，结合后端进行二次校验，能有效避免被恶意抓取后的模拟验证，进一步提升验证码的可靠性。",
