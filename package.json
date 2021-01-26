@@ -1,6 +1,6 @@
 {
     "name": "makeit-captcha",
-    "version": "1.1.9",
+    "version": "1.2.0",
     "author": {
         "url": "https://www.makeit.vip",
         "name": "lirongtong",
@@ -53,7 +53,7 @@
     "dependencies": {
         "@ant-design/icons-vue": "^5.1.9",
         "axios": "^0.21.1",
-        "makeit-tooltip": "^1.1.0",
+        "makeit-tooltip": "^1.1.1",
         "vue": "^3.0.4",
         "vue-types": "^3.0.1"
     },
