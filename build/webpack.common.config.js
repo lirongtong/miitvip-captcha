@@ -57,6 +57,12 @@ module.exports = {
 				commonjs: '@ant-design/icons-vue',
 				commonjs2: '@ant-design/icons-vue',
 				amd: '@ant-design/icons-vue'
+            },
+            'makeit-tooltip': {
+				root: 'MakeitTooltip',
+				commonjs: 'makeit-tooltip',
+				commonjs2: 'makeit-tooltip',
+				amd: 'makeit-tooltip'
 			}
         }
     ],
