@@ -93,10 +93,10 @@ export default defineComponent({
     beforeUnmount() {
         tools.off(this.elements.slider, 'pointerdown', this.dragStart)
         tools.off(this.elements.slider, 'touchstart', this.dragStart)
-        tools.off(this.elements.slider, 'pointermove', this.dragMoving)
-        tools.off(this.elements.slider, 'touchmove', this.dragMoving)
-        tools.off(this.elements.slider, 'pointerup', this.dragEnd)
-        tools.off(this.elements.slider, 'touchend', this.dragEnd)
+        tools.off(document.body, 'pointermove', this.dragMoving)
+        tools.off(document.body, 'touchmove', this.dragMoving)
+        tools.off(document.body, 'pointerup', this.dragEnd)
+        tools.off(document.body, 'touchend', this.dragEnd)
     },
     mounted() {
         this.init()
@@ -115,10 +115,11 @@ export default defineComponent({
             this.initCaptcha()
             tools.on(this.elements.slider, 'pointerdown', this.dragStart)
             tools.on(this.elements.slider, 'touchstart', this.dragStart)
-            tools.on(this.elements.slider, 'pointermove', this.dragMoving)
-            tools.on(this.elements.slider, 'touchmove', this.dragMoving)
-            tools.on(this.elements.slider, 'pointerup', this.dragEnd)
-            tools.on(this.elements.slider, 'touchend', this.dragEnd)
+            tools.on(document.body, 'pointermove', this.dragMoving)
+            tools.on(document.body, 'touchmove', this.dragMoving)
+            tools.on(document.body, 'pointerup', this.dragEnd)
+            tools.on(document.body, 'touchend', this.dragEnd)
+            tools.on(document.body, 'pointerup', this.dragFinish)
         },
         refreshCaptcha() {
             this.loading = true
@@ -344,8 +345,9 @@ export default defineComponent({
         dragMoving(event: any) {
             if (!this.drag.moving || this.check.being) return
             const x = event.clientX || event.touches[0].clientX
-            const moveX = Math.round((x - this.drag.originX - this.drag.offset) * 10) / 10
-            if (moveX < 0 || moveX + 54 >= this.size.width) {
+            let moveX = Math.round((x - this.drag.originX - this.drag.offset) * 10) / 10
+            moveX = moveX <= 0 ? 0 : moveX
+            if (moveX + 54 >= this.size.width) {
                 this.checkVerificationCode()
                 return false
             }
@@ -357,6 +359,9 @@ export default defineComponent({
             if (!this.drag.moving) return
             this.time.end = Date.now()
             this.checkVerificationCode()
+        },
+        dragFinish() {
+            this.dragEnd()
         },
         dragReset() {
             this.elements.slider.style.left = 0
