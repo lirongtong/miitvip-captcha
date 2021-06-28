@@ -19,6 +19,7 @@
 		"declaration": true,
 		"declarationDir": "lib",
 		"allowJs": true,
+		"resolveJsonModule": true,
         "baseUrl": "./",
         "paths": {
 			"makeit-captcha": ["src/index.ts"]
