@@ -1,4 +1,5 @@
 import { App } from 'vue'
+import { version } from '../package.json'
 import { default as Captcha } from './captcha'
 
 const install = (app: App) => {
@@ -9,6 +10,6 @@ const install = (app: App) => {
 export { Captcha }
 
 export default {
-    version: `${process.env.VERSION}`,
+    version,
     install
 }
