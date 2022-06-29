@@ -1,52 +1,74 @@
-import { defineComponent } from 'vue'
-import axios from 'axios'
+import { defineComponent, ref, reactive, onMounted, onBeforeUnmount, Transition } from 'vue'
+import { Tooltip } from 'ant-design-vue'
 import { CloseCircleOutlined, ReloadOutlined, QuestionCircleOutlined } from '@ant-design/icons-vue'
-import { Tooltip } from 'makeit-tooltip'
-import PropTypes from '../utils/props'
-import tools from '../utils/tools'
+import PropTypes from '../utils/props-types'
+import { getPrefixCls } from '../utils/props-tools'
+import { $tools } from '../utils/tools'
+import { $g } from '../utils/global'
+import { $request } from '../utils/request'
 
-const prefixCls = 'mi-captcha-modal'
-const selectors = {
-    modal: prefixCls,
-    image: `${prefixCls}-image`,
-    block: `${prefixCls}-block`,
-    slider: `${prefixCls}-slider`,
-    mask: `${prefixCls}-mask`,
-    result: `${prefixCls}-result`,
-    content: `${prefixCls}-content`
-}
+const BACKGROUND = 'https://file.makeit.vip/MIIT/M00/00/00/ajRkHV7d0JOAJYSMAAFwUxGzMIc287.jpg'
+const POWERED = 'Powered By makeit.vip'
+const AVATAR = 'https://file.makeit.vip/MIIT/M00/00/00/ajRkHV_pUyOALE2LAAAtlj6Tt_s370.png'
+const TARGET = 'https://admin.makeit.vip/components/captcha'
 
-const urlReg = /^((https|http|ftp|rtsp|mms)?:\/\/)(([0-9A-Za-z_!~*'().&=+$%-]+: )?[0-9A-Za-z_!~*'().&=+$%-]+@)?(([0-9]{1,3}.){3}[0-9]{1,3}|([0-9A-Za-z_!~*'()-]+.)*([0-9A-Za-z][0-9A-Za-z-]{0,61})?[0-9A-Za-z].[A-Za-z]{2,6})(:[0-9]{1,4})?((\/?)|(\/[0-9A-Za-z_!~*'().;?:@&=+$,%#-]+)+\/?)$/
+export const captchaModalProps = () => ({
+    prefixCls: PropTypes.string,
+    show: PropTypes.bool.def(false),
+    image: PropTypes.string,
+    position: PropTypes.object,
+    mask: PropTypes.bool.def(true),
+    maskClosable: PropTypes.bool.def(true),
+    themeColor: PropTypes.string,
+    bgColor: PropTypes.string,
+    boxShadow: PropTypes.bool.def(true),
+    boxShadowColor: PropTypes.string,
+    boxShadowBlur: PropTypes.number.def(6),
+    maxTries: PropTypes.number.def(5),
+    verifyParams: PropTypes.object.def({}),
+    verifyMethod: PropTypes.string.def('post'),
+    verifyAction: PropTypes.string
+})
 
 export default defineComponent({
     name: 'MiCaptchaModal',
-    props: {
-        show: PropTypes.bool.def(false),
-        image: PropTypes.string,
-        position: PropTypes.object,
-        mask: PropTypes.bool.def(true),
-        maskClosable: PropTypes.bool.def(true),
-        themeColor: PropTypes.string,
-        bgColor: PropTypes.string,
-        boxShadow: PropTypes.bool.def(true),
-        boxShadowColor: PropTypes.string,
-        boxShadowBlur: PropTypes.number.def(6),
-        maxTries: PropTypes.number.def(5),
-        verifyParams: PropTypes.object.def({}),
-        verifyAction: PropTypes.string,
-        onModalClose: PropTypes.func
-    },
-    data() {
-        return {
-            prefixCls: 'mi-captcha-modal',
+    inheritAttrs: false,
+    props: captchaModalProps(),
+    emits: ['modalClose'],
+    setup(props, { emit }) {
+        const prefixCls = getPrefixCls('captcha-modal', props.prefixCls)
+        const langCls = getPrefixCls(`lang-zh-cn`, props.prefixCls)
+        const animation = getPrefixCls('anim-scale')
+
+        const modalRef = ref<InstanceType<typeof HTMLElement>>(null)
+        const maskRef = ref<InstanceType<typeof HTMLElement>>(null)
+        const contentRef = ref<InstanceType<typeof HTMLElement>>(null)
+        const sliderRef = ref<InstanceType<typeof HTMLElement>>(null)
+        const sliderBtnRef = ref<InstanceType<typeof HTMLElement>>(null)
+        const imageRef = ref<InstanceType<typeof HTMLElement>>(null)
+        const blockRef = ref<InstanceType<typeof HTMLElement>>(null)
+        const resultRef = ref<InstanceType<typeof HTMLElement>>(null)
+
+        const show = ref<boolean>(props.show)
+
+        const classes = {
+            modal: prefixCls,
+            image: `${prefixCls}-image`,
+            block: `${prefixCls}-block`,
+            slider: `${prefixCls}-slider`,
+            mask: `${prefixCls}-mask`,
+            result: `${prefixCls}-result`,
+            content: `${prefixCls}-content`
+        }
+        const params = reactive({
             loading: true,
-            background: 'https://file.makeit.vip/MIIT/M00/00/00/ajRkHV7d0JOAJYSMAAFwUxGzMIc287.jpg',
-            target: 'https://admin.makeit.vip/components/captcha',
-            avatar: 'https://file.makeit.vip/MIIT/M00/00/00/ajRkHV_pUyOALE2LAAAtlj6Tt_s370.png',
-            powered: 'Powered By makeit.vip',
+            background: BACKGROUND,
+            avatar: AVATAR,
+            powered: POWERED,
+            target: TARGET,
             ctx: {
                 image: null,
-                block: null,
+                block: null
             },
             elements: {
                 slider: null,
@@ -77,65 +99,70 @@ export default defineComponent({
                 start: null,
                 end: null
             },
-            check: {},
+            check: {
+                tries: props.maxTries ?? 5,
+                num: 0,
+                correct: false,
+                show: false,
+                tip: null,
+                being: false,
+                value: null
+            },
             _background: null
+        })
+
+        onMounted(() => {
+            init()
+        })
+
+        onBeforeUnmount(() => {
+            $tools.off(params.elements.slider, 'pointerdown', dragStart)
+            $tools.off(params.elements.slider, 'touchstart', dragStart)
+            $tools.off(params.elements.slider, 'pointermove', dragMoving)
+            $tools.off(params.elements.slider, 'touchmove', dragMoving)
+            $tools.off(params.elements.slider, 'pointerup', dragEnd)
+            $tools.off(params.elements.slider, 'touchend', dragEnd)
+        })
+
+        const init = () => {
+            params._background = props.image ?? params.background
+            initModal()
         }
-    },
-    watch: {
-        show(value: boolean) {
-            if (value) {
-                this.$nextTick(() => {
-                    this.init()
-                })
+
+        const initModal = () => {
+            params.elements = {
+                slider: sliderBtnRef.value,
+                block: blockRef.value
+            }
+            params.block.real = params.block.size + params.block.radius * 2 + 2
+            setCheckData()
+            initCaptcha()
+            $tools.on(params.elements.slider, 'pointerdown', dragStart)
+            $tools.on(params.elements.slider, 'touchstart', dragStart)
+            $tools.on(params.elements.slider, 'pointermove', dragMoving)
+            $tools.on(params.elements.slider, 'touchmove', dragMoving)
+            $tools.on(params.elements.slider, 'pointerup', dragEnd)
+            $tools.on(params.elements.slider, 'touchend', dragEnd)
+        }
+
+        const setCheckData = () => {
+            params.check = {
+                tries: props.maxTries ?? 5,
+                num: 0,
+                being: false,
+                value: null,
+                correct: false,
+                tip: '拖动滑块将悬浮图像正确拼合',
+                show: false
             }
         }
-    },
-    beforeUnmount() {
-        tools.off(this.elements.slider, 'pointerdown', this.dragStart)
-        tools.off(this.elements.slider, 'touchstart', this.dragStart)
-        tools.off(document.body, 'pointermove', this.dragMoving)
-        tools.off(document.body, 'touchmove', this.dragMoving)
-        tools.off(document.body, 'pointerup', this.dragEnd)
-        tools.off(document.body, 'touchend', this.dragEnd)
-    },
-    mounted() {
-        this.init()
-    },
-    methods: {
-        init() {
-            this._background = this.image ?? this.background
-            this.initModal()
-        },
-        initModal() {
-            const slider = this.$refs[`${selectors.slider}-btn`]
-            const block = this.$refs[selectors.block]
-            this.elements = {slider, block}
-            this.block.real = this.block.size + this.block.radius * 2 + 2
-            this.setCheckData()
-            this.initCaptcha()
-            tools.on(this.elements.slider, 'pointerdown', this.dragStart)
-            tools.on(this.elements.slider, 'touchstart', this.dragStart)
-            tools.on(document.body, 'pointermove', this.dragMoving)
-            tools.on(document.body, 'touchmove', this.dragMoving)
-            tools.on(document.body, 'pointerup', this.dragEnd)
-            tools.on(document.body, 'touchend', this.dragEnd)
-            tools.on(document.body, 'pointerup', this.dragFinish)
-        },
-        refreshCaptcha() {
-            this.loading = true
-            this.setCheckData()
-            const block = this.$refs[selectors.block]
-            block.width = this.size.width
-            this.ctx.image.clearRect(0, 0, this.size.width, this.size.height)
-            this.ctx.block.clearRect(0, 0, this.size.width, this.size.height)
-            this.initImageElem()
-        },
-        initCaptcha() {
-            const image = this.$refs[selectors.image]
-            const block = this.$refs[selectors.block]
+
+        const initCaptcha = () => {
+            const image = imageRef.value as HTMLCanvasElement
+            const block = blockRef.value as HTMLCanvasElement
             const imageCtx = image ? image.getContext('2d') : null
             const blockCtx = block ? block.getContext('2d') : null
-            this.ctx = {image: imageCtx, block: blockCtx}
+            params.ctx = { image: imageCtx, block: blockCtx }
             /**
              * 图片统一转为 base64, 避免跨域问题.
              * 也可采用xhr异步请求图片地址.
@@ -160,140 +187,146 @@ export default defineComponent({
              * }
              * ```
              */
-            if (urlReg.test(this._background)) this.imageToBase64(this.initImageElem)
-            else this.initImageElem()
-        },
-        initImage(elem: HTMLElement) {
-            if (
-                this.ctx.image &&
-                this.ctx.block
-            ) {
-                /** image */
-                this.ctx.image.drawImage(
-					elem,
-					0,
-					0,
-					this.size.width,
-					this.size.height
-                )
-                /** text */
-                this.ctx.image.beginPath()
-                this.ctx.image.fillStyle = '#FFF'
-				this.ctx.image.shadowColor = 'transparent'
-				this.ctx.image.shadowBlur = 0
-				this.ctx.image.font = 'bold 24px MicrosoftYaHei'
-				this.ctx.image.fillText('拖动滑块拼合图片', 12, 30)
-				this.ctx.image.font = '16px MicrosoftYaHei'
-				this.ctx.image.fillText('就能验证成功哦', 12, 55)
-                this.ctx.image.closePath()
-                /** block */
-                this.ctx.block.save()
-                this.ctx.block.globalCompositeOperation = 'destination-over'
-                this.drawBlockPosition()
-				this.ctx.block.drawImage(
-                    elem,
-                    0,
-                    0,
-                    this.size.width,
-                    this.size.height
-                )
-                /** image data */
-                const coordinateY = this.coordinate.y - this.block.radius * 2 + 1
-                const imageData = this.ctx.block.getImageData(
-                    this.coordinate.x,
-                    coordinateY,
-                    this.block.real,
-                    this.block.real
-                )
-                const block = this.$refs[selectors.block]
-                block.width = this.block.real
-                this.ctx.block.putImageData(
-                    imageData,
-                    this.coordinate.offset,
-                    coordinateY
-                )
-                this.ctx.block.restore()
-                this.loading = false
+            if ($g.regExp.url.test(params._background)) image2Base64(initImageElem)
+            else initImageElem()
+        }
+
+        const refreshCaptcha = () => {
+            params.loading = true
+            setCheckData()
+            const block = blockRef.value as HTMLCanvasElement
+            block.width = params.size.width
+            params.ctx.image.clearRect(0, 0, params.size.width, params.size.height)
+            params.ctx.block.clearRect(0, 0, params.size.width, params.size.height)
+            initImageElem()
+        }
+
+        const closeModal = (status?: any, data?: any) => {
+            params.loading = true
+            if (typeof status !== 'string') status = 'close'
+            if (props.maskClosable) {
+                show.value = false
+                setTimeout(() => {
+                    emit('modalClose', {
+                        status,
+                        data
+                    })
+                }, 400)
             }
-        },
-        initImageElem() {
-            const elem = new Image()
-            elem.src = this._background
-            elem.onload = () => this.initImage(elem)
-        },
-        imageToBase64(callback: Function) {
+        }
+
+        const image2Base64 = (callback: Function) => {
             const elem = new Image()
             const canvas = document.createElement('canvas')
             const ctx = canvas.getContext('2d')
-            canvas.width = this.size.width
-            canvas.height = this.size.height
+            canvas.width = params.size.width
+            canvas.height = params.size.height
             elem.crossOrigin = ''
-            elem.src = this._background
+            elem.src = params._background
             elem.onload = () => {
-                ctx.drawImage(
-                    elem,
-                    0,
-                    0,
-                    this.size.width,
-                    this.size.height
-                )
-                this._background = canvas.toDataURL()
-                if (callback) callback.apply(this)
+                ctx.drawImage(elem, 0, 0, params.size.width, params.size.height)
+                params._background = canvas.toDataURL()
+                callback && callback()
             }
-        },
-        drawBlock(
+        }
+
+        const initImage = (elem: HTMLElement) => {
+            if (params.ctx.image && params.ctx.block) {
+                /** image */
+                params.ctx.image.drawImage(elem, 0, 0, params.size.width, params.size.height)
+                /** text */
+                params.ctx.image.beginPath()
+                params.ctx.image.fillStyle = '#FFF'
+                params.ctx.image.shadowColor = 'transparent'
+                params.ctx.image.shadowBlur = 0
+                params.ctx.image.font = 'bold 24px MicrosoftYaHei'
+                params.ctx.image.fillText('拖动滑块拼合图片', 12, 30)
+                params.ctx.image.font = '16px MicrosoftYaHei'
+                params.ctx.image.fillText('就能验证成功哦', 12, 55)
+                params.ctx.image.closePath()
+                /** block */
+                params.ctx.block.save()
+                params.ctx.block.globalCompositeOperation = 'destination-over'
+                drawBlockPosition()
+                params.ctx.block.drawImage(elem, 0, 0, params.size.width, params.size.height)
+                /** image data */
+                const coordinateY = params.coordinate.y - params.block.radius * 2 + 1
+                const imageData = params.ctx.block.getImageData(
+                    params.coordinate.x,
+                    coordinateY,
+                    params.block.real,
+                    params.block.real
+                )
+                const block = blockRef.value as HTMLCanvasElement
+                if (block) block.width = params.block.real
+                params.ctx.block.putImageData(imageData, params.coordinate.offset, coordinateY)
+                params.ctx.block.restore()
+                params.loading = false
+            }
+        }
+
+        const initImageElem = () => {
+            const elem = new Image()
+            elem.src = params._background
+            elem.onload = () => initImage(elem)
+        }
+
+        const drawBlock = (
             ctx: CanvasRenderingContext2D,
             direction: any = {},
             operation: string
-        ) {
+        ) => {
             ctx.beginPath()
-            ctx.moveTo(this.coordinate.x, this.coordinate.y)
+            ctx.moveTo(params.coordinate.x, params.coordinate.y)
             const direct = direction.direction
             const type = direction.type
             /** top */
             if (direct === 'top') {
                 ctx.arc(
-                    this.coordinate.x + this.block.size / 2,
-                    this.coordinate.y,
-                    this.block.radius,
-                    -this.block.PI,
+                    params.coordinate.x + params.block.size / 2,
+                    params.coordinate.y,
+                    params.block.radius,
+                    -params.block.PI,
                     0,
                     type === 'inner'
                 )
             }
-            ctx.lineTo(this.coordinate.x + this.block.size, this.coordinate.y)
+            ctx.lineTo(params.coordinate.x + params.block.size, params.coordinate.y)
             /** right */
             if (direct === 'right') {
                 ctx.arc(
-                    this.coordinate.x + this.block.size,
-                    this.coordinate.y + this.block.size / 2,
-                    this.block.radius,
-                    1.5 * this.block.PI,
-                    0.5 * this.block.PI,
+                    params.coordinate.x + params.block.size,
+                    params.coordinate.y + params.block.size / 2,
+                    params.block.radius,
+                    1.5 * params.block.PI,
+                    0.5 * params.block.PI,
                     type === 'inner'
                 )
             }
-            ctx.lineTo(this.coordinate.x + this.block.size, this.coordinate.y + this.block.size)
+            ctx.lineTo(
+                params.coordinate.x + params.block.size,
+                params.coordinate.y + params.block.size
+            )
             /** bottom */
             ctx.arc(
-                this.coordinate.x + this.block.size / 2,
-                this.coordinate.y + this.block.size,
-                this.block.radius,
+                params.coordinate.x + params.block.size / 2,
+                params.coordinate.y + params.block.size,
+                params.block.radius,
                 0,
-                this.block.PI,
+                params.block.PI,
                 true
             )
-            ctx.lineTo(this.coordinate.x, this.coordinate.y + this.block.size)
+            ctx.lineTo(params.coordinate.x, params.coordinate.y + params.block.size)
             /** left */
             ctx.arc(
-                this.coordinate.x,
-                this.coordinate.y + this.block.size / 2,
-                this.block.radius,
-                0.5 * this.block.PI,
-                1.5 * this.block.PI,
+                params.coordinate.x,
+                params.coordinate.y + params.block.size / 2,
+                params.block.radius,
+                0.5 * params.block.PI,
+                1.5 * params.block.PI,
                 true
             )
-            ctx.lineTo(this.coordinate.x, this.coordinate.y)
+            ctx.lineTo(params.coordinate.x, params.coordinate.y)
             ctx.shadowColor = 'rgba(0, 0, 0, .001)'
             ctx.shadowBlur = 20
             ctx.lineWidth = 1.5
@@ -302,21 +335,23 @@ export default defineComponent({
             ctx.stroke()
             ctx.closePath()
             ctx[operation]()
-        },
-        drawBlockPosition() {
-            const x = tools.randomNumberInRange(
-                this.block.real + 20,
-                this.size.width - (this.block.real + 20)
+        }
+
+        const drawBlockPosition = () => {
+            const x = $tools.randomNumberInRange(
+                params.block.real + 20,
+                params.size.width - (params.block.real + 20)
             )
-            const y = tools.randomNumberInRange(55, this.size.height - 55)
-            const direction = this.drawBlockDirection()
-            this.coordinate.x = x
-            this.coordinate.y = y
-            this.drawBlock(this.ctx.image, direction, 'fill')
-            this.drawBlock(this.ctx.block, direction, 'clip')
-        },
-        drawBlockDirection() {
-            const direction = {top: 'top', right: 'right'}
+            const y = $tools.randomNumberInRange(55, params.size.height - 55)
+            const direction = drawBlockDirection()
+            params.coordinate.x = x
+            params.coordinate.y = y
+            drawBlock(params.ctx.image, direction, 'fill')
+            drawBlock(params.ctx.block, direction, 'clip')
+        }
+
+        const drawBlockDirection = () => {
+            const direction = { top: 'top', right: 'right' }
             const from = ['inner', 'outer']
             const result: any = {}
             const keys = Object.keys(direction)
@@ -324,153 +359,166 @@ export default defineComponent({
             result.direction = direction[key]
             result.type = from[Math.floor(Math.random() * from.length)]
             return result
-        },
-        getBoundingClientRect(elem: HTMLElement, specific = null) {
+        }
+
+        const getBoundingClientRect = (elem: HTMLElement, specific = null) => {
             const rect = elem.getBoundingClientRect()
             if (specific && rect[specific]) return rect[specific]
             return rect
-        },
-        dragStart(event: any) {
-            const x = event.clientX || event.touches[0].clientX
-            const sliderRef = this.$refs[selectors.slider]
-            const sliderBtnRef = this.$refs[`${selectors.slider}-btn`]
-            const sliderRect = this.getBoundingClientRect(sliderRef)
-            const sliderBtnRect = this.getBoundingClientRect(sliderBtnRef)
-            this.drag.originX = Math.round(sliderRect.left * 10) / 10
-            this.drag.originY = Math.round(sliderRect.top * 10) / 10
-            this.drag.offset = Math.round((x - sliderBtnRect.left) * 10) / 10
-            this.drag.moving = true
-            this.time.start = Date.now()
-        },
-        dragMoving(event: any) {
-            if (!this.drag.moving || this.check.being) return
-            const x = event.clientX || event.touches[0].clientX
-            let moveX = Math.round((x - this.drag.originX - this.drag.offset) * 10) / 10
-            moveX = moveX <= 0 ? 0 : moveX
-            if (moveX + 54 >= this.size.width) {
-                this.checkVerificationCode()
+        }
+
+        const dragStart = (evt: any) => {
+            const x = evt.clientX || evt.touches[0].clientX
+            const sliderRect = getBoundingClientRect(sliderRef.value)
+            const sliderBtnRect = getBoundingClientRect(sliderBtnRef.value)
+            params.drag.originX = Math.round(sliderRect.left * 10) / 10
+            params.drag.originY = Math.round(sliderRect.top * 10) / 10
+            params.drag.offset = Math.round((x - sliderBtnRect.left) * 10) / 10
+            params.drag.moving = true
+            params.time.start = Date.now()
+        }
+
+        const dragMoving = (evt: any) => {
+            if (!params.drag.moving || params.check.being) return
+            const x = evt.clientX || evt.touches[0].clientX
+            const moveX = Math.round((x - params.drag.originX - params.drag.offset) * 10) / 10
+            if (moveX < 0 || moveX + 54 >= params.size.width) {
+                checkVerificationCode()
                 return false
             }
-            this.elements.slider.style.left = `${moveX}px`
-            this.elements.block.style.left = `${moveX}px`
-            this.check.value = moveX
-        },
-        dragEnd() {
-            if (!this.drag.moving) return
-            this.time.end = Date.now()
-            this.checkVerificationCode()
-        },
-        dragFinish() {
-            this.dragEnd()
-        },
-        dragReset() {
-            this.elements.slider.style.left = 0
-            this.elements.block.style.left = 0
-            this.drag.originX = 0
-            this.drag.originY = 0
-        },
-        async checkVerificationCode() {
-            const coordinateX = Math.round(this.check.value + this.coordinate.offset)
-            if (this.check.being) return
-            this.check.being = true
+            params.elements.slider.style.left = `${moveX}px`
+            params.elements.block.style.left = `${moveX}px`
+            params.check.value = moveX
+        }
+
+        const dragEnd = () => {
+            if (!params.drag.moving) return
+            params.time.end = Date.now()
+            checkVerificationCode()
+        }
+
+        const dragReset = () => {
+            params.elements.slider.style.left = 0
+            params.elements.block.style.left = 0
+            params.drag.originX = 0
+            params.drag.originY = 0
+        }
+
+        const checkVerificationCode = async () => {
+            const coordinateX = Math.round(params.check.value + params.coordinate.offset)
+            if (params.check.being) return
+            params.check.being = true
             const error = (msg = null) => {
                 setTimeout(() => {
-                    this.dragReset()
+                    dragReset()
                 }, 1000)
-                this.check.num++
-                this.check.correct = false
-                if (msg) this.check.tip = msg
+                params.check.num++
+                params.check.correct = false
+                if (msg) params.check.tip = msg
             }
-            if (
-                this.coordinate.x - 2 <= coordinateX &&
-                this.coordinate.x + 2 >= coordinateX
-            ) {
+            if (params.coordinate.x - 2 <= coordinateX && params.coordinate.x + 2 >= coordinateX) {
                 const succcess = (data: any = {}) => {
                     setTimeout(() => {
-                        this.closeModal('success', data)
-                    }, 600)
+                        closeModal('success', data)
+                    }, 500)
                 }
-                const taking = Math.round(((this.time.end - this.time.start) / 10)) / 100
-                this.check.tip = `${taking}s速度完成图片拼合验证`
-                if (this.verifyAction) {
-                    await axios.post(this.verifyAction, this.verifyParams).then((res: any) => {
-                        const response = res.data
-                        if (response.ret.code === 1) {
-                            this.check.correct = true
-                            succcess(response.data)
-                        } else error(response.ret.message)
-                    }).catch((err: any) => {
-                        error(err.message)
-                    })
+                const take = Math.round((params.time.end - params.time.start) / 10) / 100
+                params.check.tip = `${take}s速度完成图片拼合验证`
+                if (props.verifyAction) {
+                    await $request[props.verifyMethod.toLowerCase()](
+                        props.verifyAction,
+                        props.verifyParams
+                    )
+                        .then((res: any) => {
+                            if (res.ret.code === 200) {
+                                params.check.correct = true
+                                succcess(res.data)
+                            } else error(res.ret.message)
+                        })
+                        .catch((err: any) => {
+                            error(err.message)
+                        })
                 } else {
-                    this.check.correct = true
+                    params.check.correct = true
                     succcess()
                 }
             } else error()
-            const result = this.$refs[selectors.result]
-            if (result) result.style.bottom = 0
-            if (this.check.num <= this.check.tries) this.check.show = true
+            const result = resultRef.value
+            if (result) result.style.bottom = '0'
+            if (params.check.num <= params.check.tries) params.check.show = true
             setTimeout(() => {
-                this.drag.moving = false
-                if (result) result.style.bottom = '-32px'
+                params.drag.moving = false
+                if (result) result.style.bottom = $tools.convert2Rem(-32)
             }, 1000)
             setTimeout(() => {
-                this.check.show = false
-                this.check.being = false
-                if (this.check.num >= this.check.tries) this.closeModal('frequently')
+                params.check.show = false
+                params.check.being = false
+                if (params.check.num >= params.check.tries) closeModal('frequently')
             }, 1600)
-        },
-        setCheckData() {
-            this.check = {
-                tries: this.tries ?? 5,
-                num: 0,
-                being: false,
-                value: null,
-                correct: false,
-                tip: '拖动滑块将悬浮图像正确拼合',
-                show: false
-            }
-        },
-        closeModal(status = 'close', data: any = {}) {
-            this.loading = true
-            if (typeof status !== 'string') status = 'close'
-            if (this.maskClosable) this.$emit('modalClose', {
-                status,
-                data
-            })
-        },
-        getArrowElem() {
-            const arrowCls = `${this.prefixCls}-arrow`
-            const inStyle = {
-                borderColor: this.bgColor
-                    ? `transparent ${this.bgColor} transparent transparent`
-                    : null
-            }
-            const outStyle = {
-                borderColor: this.themeColor
-                    ? `transparent ${this.themeColor} transparent transparent`
+        }
+
+        const renderMask = () => {
+            return props.mask && props.show ? (
+                <div class={classes.mask} onClick={closeModal} ref={maskRef} />
+            ) : null
+        }
+
+        const renderArrow = () => {
+            const arrowCls = `${prefixCls}-arrow`
+            const style = {
+                borderColor: props.themeColor
+                    ? `transparent ${props.themeColor} transparent transparent`
                     : null
             }
             return (
                 <div class={arrowCls}>
-                    <div class={`${arrowCls}-out`} style={outStyle}></div>
-                    <div class={`${arrowCls}-in`} style={inStyle}></div>
+                    <div class={`${arrowCls}-out`} style={style} />
+                    <div class={`${arrowCls}-in`} style={style} />
                 </div>
             )
-        },
-        getMaskElem() {
-            return this.mask && this.show ? (
-                <div class={`${selectors.mask}`}
-                    onClick={this.closeModal}
-                    ref={`${selectors.mask}`}>
+        }
+
+        const renderContent = () => {
+            const style = {
+                borderColor: props.themeColor ?? null,
+                background: props.bgColor ?? null,
+                boxShadow:
+                    props.boxShadow && (props.boxShadowColor || props.themeColor)
+                        ? `0 0 ${$tools.convert2Rem(props.boxShadowBlur)} ${
+                              props.boxShadowColor || props.themeColor
+                          }`
+                        : null
+            }
+            return (
+                <div class={classes.content} style={style} ref={contentRef}>
+                    <div class={`${prefixCls}-wrap`}>
+                        <div class={`${prefixCls}-embed`}>
+                            {renderContentLoading()}
+                            {renderContentInfo()}
+                            {renderContentResult()}
+                        </div>
+                        <div
+                            ref={sliderRef}
+                            class={`${classes.slider}${
+                                params.drag.moving ? ` ${classes.slider}-moving` : ''
+                            }`}>
+                            {renderSliderTrack()}
+                            {renderSliderBtn()}
+                        </div>
+                    </div>
+                    <div class={`${prefixCls}-panel`}>
+                        {renderPanelAction()}
+                        {renderPanelCopyright()}
+                    </div>
                 </div>
-            ) : null
-        },
-        getContentLoadingElem() {
-            const loadingCls = `${this.prefixCls}-loading`
-            const style1 = {borderColor: this.themeColor ?? null}
-            const style2 = {background: this.themeColor ?? null}
-            return this.loading ? (
+            )
+        }
+
+        const renderContentLoading = () => {
+            const loadingCls = `${prefixCls}-loading`
+            const style1 = { borderColor: props.themeColor ?? null }
+            const style2 = { background: props.themeColor ?? null }
+            return params.loading ? (
                 <div class={loadingCls}>
                     <div class={`${loadingCls}-spinner`}>
                         <div class="load">
@@ -482,127 +530,127 @@ export default defineComponent({
                             </div>
                         </div>
                     </div>
-                    <div class={`${loadingCls}-tip`}>正在加载验证码</div>
+                    <div class={`${loadingCls}-tip`}>{'正在加载验证码 ···'}</div>
                 </div>
             ) : null
-        },
-        getContentInfoElem() {
+        }
+
+        const renderContentInfo = () => {
             return (
-                <div class={`${this.prefixCls}-info`}>
+                <div class={`${prefixCls}-info`}>
                     <canvas
-                        width={this.size.width}
-                        height={this.size.height}
-                        ref={`${selectors.image}`}>
-                    </canvas>
+                        width={params.size.width}
+                        height={params.size.height}
+                        ref={imageRef}></canvas>
                     <canvas
-                        width={this.size.width}
-                        height={this.size.height}
-                        ref={`${selectors.block}`}>
-                    </canvas>
+                        width={params.size.width}
+                        height={params.size.height}
+                        ref={blockRef}></canvas>
                 </div>
             )
-        },
-        getContentResultElem() {
-            const cls = `${selectors.result} ${this.check.correct ? `${selectors.result}-success` : `${selectors.result}-error`}`
-            return <div class={cls} ref={selectors.result} innerHTML={this.check.tip}></div>
-        },
-        getSliderTrackElem() {
-            const sliderTrackCls = `${selectors.slider}-track`
-            const style = {borderColor: this.themeColor ?? null}
+        }
+
+        const renderContentResult = () => {
+            const cls = `${classes.result} ${
+                params.check.correct ? `${classes.result}-success` : `${classes.result}-error`
+            }`
+            return <div class={cls} ref={resultRef} innerHTML={params.check.tip}></div>
+        }
+
+        const renderSliderTrack = () => {
+            const sliderTrackCls = `${classes.slider}-track`
+            const style = { borderColor: props.themeColor ?? null }
             return (
                 <div class={sliderTrackCls} style={style}>
-                    <span class={`${sliderTrackCls}-tip${this.drag.moving ? ' hide' : ''}`}>拖动左边滑块完成上方拼图</span>
+                    <span class={`${sliderTrackCls}-tip${params.drag.moving ? ' hide' : ''}`}>
+                        拖动左边滑块完成上方拼图
+                    </span>
                 </div>
             )
-        },
-        getSliderBtnElem() {
-            const sliderBtnCls = `${selectors.slider}-btn`
-            const style = {borderColor: this.themeColor ?? null}
+        }
+
+        const renderSliderBtn = () => {
+            const sliderBtnCls = `${classes.slider}-btn`
+            const style = { borderColor: props.themeColor ?? null }
             return (
-                <div class={sliderBtnCls} style={style} ref={sliderBtnCls}>
+                <div class={sliderBtnCls} style={style} ref={sliderBtnRef}>
                     <div class={`${sliderBtnCls}-icon`} style={style}>
-                        <div class={`${sliderBtnCls}-vertical`}></div>
-                        <div class={`${sliderBtnCls}-horizontal`} style={{background: this.themeColor ?? null}}></div>
+                        <div class={`${sliderBtnCls}-vertical`} />
+                        <div
+                            class={`${sliderBtnCls}-horizontal`}
+                            style={{ background: props.themeColor ?? null }}
+                        />
                     </div>
                 </div>
             )
-        },
-        getPanelActionElem() {
-            const panelActionCls = `${this.prefixCls}-panel-action`
+        }
+
+        const renderPanelAction = () => {
+            const panelActionCls = `${prefixCls}-panel-action`
             return (
                 <div class={panelActionCls}>
-                    <Tooltip title="关闭验证" autoAdjust={false} bgColor={this.themeColor}>
-                        <CloseCircleOutlined onClick={this.closeModal} />
+                    <Tooltip
+                        title="关闭验证"
+                        autoAdjustOverflow={false}
+                        overlayClassName={`${prefixCls}-tooltip`}
+                        color={props.themeColor}>
+                        <CloseCircleOutlined onClick={closeModal} />
                     </Tooltip>
-                    <Tooltip title="刷新验证" autoAdjust={false} bgColor={this.themeColor}>
-                        <ReloadOutlined onClick={this.refreshCaptcha} />
+
+                    <Tooltip
+                        title="刷新验证"
+                        autoAdjustOverflow={false}
+                        overlayClassName={`${prefixCls}-tooltip`}
+                        color={props.themeColor}>
+                        <ReloadOutlined onClick={refreshCaptcha} />
                     </Tooltip>
-                    <Tooltip title="帮助反馈" autoAdjust={false} bgColor={this.themeColor}>
-                        <a href={this.target} target="_blank">
+
+                    <Tooltip
+                        title="帮助反馈"
+                        autoAdjustOverflow={false}
+                        overlayClassName={`${prefixCls}-tooltip`}
+                        color={props.themeColor}>
+                        <a href={params.target} target="_blank">
                             <QuestionCircleOutlined />
                         </a>
                     </Tooltip>
                 </div>
             )
-        },
-        getPanelCopyrightElem() {
-            const copyrightCls = `${this.prefixCls}-copyright`
+        }
+
+        const renderPanelCopyright = () => {
+            const copyrightCls = `${prefixCls}-copyright`
             return (
                 <div class={copyrightCls}>
                     <div class={`${copyrightCls}-text`}>
-                        <a href={this.target} target="_blank">
-                            <img src={this.avatar} alt={this.powered} />
+                        <a href={params.target} target="_blank">
+                            <img src={params.avatar} alt={params.powered} />
                         </a>
                         <span>提供技术支持</span>
                     </div>
                 </div>
             )
-        },
-        getContentElem() {
-            const style = {
-                borderColor: this.themeColor ?? null,
-                background: this.bgColor ?? null,
-                boxShadow: this.boxShadow && (this.boxShadowColor || this.themeColor)
-                    ? `0 0 ${tools.pxToRem(this.boxShadowBlur)}rem ${this.boxShadowColor || this.themeColor}`
-                    : null,
-            }
-            return (
-                <div class={selectors.content} style={style} ref={selectors.content}>
-                    <div class={`${this.prefixCls}-wrap`}>
-                        <div class={`${this.prefixCls}-embed`}>
-                            { this.getContentLoadingElem() }
-                            { this.getContentInfoElem() }
-                            { this.getContentResultElem() }
-                        </div>
-                        <div class={`${selectors.slider}${this.drag.moving ? ` ${selectors.slider}-moving` : ''}`} ref={selectors.slider}>
-                            { this.getSliderTrackElem() }
-                            { this.getSliderBtnElem() }
-                        </div>
-                    </div>
-                    <div class={`${this.prefixCls}-panel`}>
-                        { this.getPanelActionElem() }
-                        { this.getPanelCopyrightElem() }
-                    </div>
-                </div>
-            )
         }
-    },
-    render() {
-        const style = {
-            top: `${tools.pxToRem(this.position.top)}rem`,
-            left: `${tools.pxToRem(this.position.left)}rem`
-        }
-        const cls = `${this.prefixCls}${
-            !this.check.correct && this.check.show
-                ? ` ${this.prefixCls}-error`
-                : ''
-        }`
-        return this.show ? <>
-            { this.getMaskElem() }
-            <div class={cls} style={style} ref={this.prefixCls}>
-                { this.getArrowElem() }
-                { this.getContentElem() }
-            </div>
-        </> : null
+
+        return () => (
+            <>
+                {renderMask()}
+                <Transition name={animation} appear={true}>
+                    <div
+                        class={`${prefixCls} ${langCls}${
+                            !params.check.correct && params.check.show ? ` ${prefixCls}-error` : ''
+                        }`}
+                        style={{
+                            top: `${$tools.convert2Rem(props.position.top)}`,
+                            left: `${$tools.convert2Rem(props.position.left)}`
+                        }}
+                        v-show={show.value}
+                        ref={modalRef}>
+                        {renderArrow()}
+                        {renderContent()}
+                    </div>
+                </Transition>
+            </>
+        )
     }
 })

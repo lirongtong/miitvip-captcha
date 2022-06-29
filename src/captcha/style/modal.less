@@ -2,12 +2,10 @@
     &-modal {
         position: absolute;
         display: block;
-        animation-name: mi-captcha-modal-open;
-		animation-fill-mode: forwards;
-        animation-timing-function: cubic-bezier(0.6, 0, 0.4, 1);
-        .letter-spacing();
-        z-index: 19900407;
-        
+        transition: all @mi-anim-duration ease;
+        transform-origin: left center;
+        z-index: @mi-z-index-modal;
+
         &-mask {
             position: fixed;
             left: 0;
@@ -15,13 +13,14 @@
             width: 100%;
             height: 100%;
             background: transparent;
-            z-index: 19900302;
+            z-index: @mi-z-index-mask;
+            overflow: hidden;
         }
 
         &-arrow {
             display: block;
 			.properties(margin-left, -21);
-            .properties(margin-top, -10);
+            .properties(margin-top, -11);
             
             &-in{
 				position: absolute;
@@ -31,14 +30,14 @@
 				.properties(margin-right, 0);
 				.properties(margin-bottom, 1);
 				.properties(margin-left, 2);
-				border-color: transparent #1d1e23 transparent transparent;
+				border-color: transparent #3f3f3f transparent transparent;
 				z-index: 1;
 			}
 			&-out{
 				position: absolute;
 				border-style: solid;
                 .properties(border-width, 11);
-				border-color: transparent #f6ca9d transparent transparent;
+				border-color: transparent var(--mi-theme, @mi-theme) transparent transparent;
 				z-index: 1;
 			}
         }
@@ -49,9 +48,9 @@
 			left: 0;
 			.properties(top, -157);
             .border-radius();
-            background: #1d1e23;
-			box-shadow: 0 0 10px #1d1e23;
-			border: 1px solid #f6ca9d;
+            .linear-gradient-background();
+			box-shadow: 0 0 10px var(--mi-dark, @mi-dark);
+			border: 1px solid var(--mi-theme, @mi-theme);
         }
 
         &-wrap {
@@ -73,7 +72,7 @@
 		&-info {
 			position: absolute;
         }
-        
+
         &-loading {
 			.properties(width, 260);
 			.properties(height, 160);
@@ -97,7 +96,7 @@
                 }
                 
                 .load > div > div {
-                    animation: mi-anim-move 1.5s linear infinite;
+                    animation: mi-anim-move 3s linear infinite;
                     position: absolute
                 }
                 
@@ -105,7 +104,7 @@
                     .properties(width, 36);
                     .properties(height, 36);
                     border-radius: 50%;
-                    border: 6px solid #f6ca9d;
+                    border: 6px solid var(--mi-theme, @mi-theme);
                     background: transparent;
                 }
                 
@@ -113,7 +112,7 @@
                     .properties(width, 8.5);
                     .properties(height, 25.5);
                     transform: rotate(-45deg);
-                    background: #f6ca9d;
+                    background: var(--mi-theme, @mi-theme);
                     border-radius: 0 0 4px 4px;
                     position: absolute;
                     .properties(top, 34);
@@ -153,30 +152,29 @@
 				}
 			}
         }
-        
+
         &-result {
 			position: absolute;
 			left: 0;
 			.properties(bottom, -32);
 			width: 100%;
 			color: #fff;
-			transition: bottom .5s ease;
+			transition: bottom @mi-anim-duration ease;
 			.flex(center, flex-start);
 			.properties(text-indent, 12);
-            .letter-spacing();
 			.properties(font-size, 14);
             .properties(height, 32);
             z-index: 220;
 
 			&-success {
-				background: #2F9688;
+				background: var(--mi-success, @mi-success);
 			}
 
 			&-error {
-				background: #ed4014;
+				background: var(--mi-danger, @mi-danger);
 			}
         }
-        
+
         &-slider {
             position: relative;
 			.properties(margin-top, 16);
@@ -185,7 +183,7 @@
             
             &-track {
                 background: #fff;
-				border: 1px solid #f6ca9d;
+				border: 1px solid var(--mi-theme, @mi-theme);
 				.flex();
 				.border-radius(20);
 				.properties(height, 38);
@@ -215,18 +213,17 @@
 				.properties(width, 54);
 				.properties(height, 54);
 				.border-radius-circle();
-				border: 1px solid #f6ca9d;
+				border: 1px solid var(--mi-theme, @mi-theme);
 				background: #fff;
 				.flex();
 				cursor: pointer;
-                box-shadow: 1px 1px 10px #1d1e23;
+                box-shadow: 1px 1px 10px var(--mi-dark, @mi-dark);
                 
                 &-icon {
                     .properties(width, 28);
                     .properties(height, 24);
-                    border: 2px solid #1d1e23;
+                    border: 2px solid var(--mi-dark, @mi-dark);
                     .border-radius();
-                    box-shadow: 0 0 2px #1d1e23;
                     position: relative;
                 }
 
@@ -242,13 +239,12 @@
                 &-horizontal {
                     .properties(width, 20);
                     .properties(height, 2);
-                    background: #1d1e23;
+                    background: var(--mi-dark, @mi-dark);
                     .border-radius();
                     position: absolute;
                     .properties(left, 2);
                     .properties(top, 11);
                     transition: all .5 ease;
-                    box-shadow: 0 0 2px #1d1e23;
                     animation: mi-anim-scan 1.5s linear infinite;
                     z-index: 20;
                 }
@@ -305,26 +301,17 @@
                     box-shadow: 0px 0px 30px 0px fade(#f6ca9d, 50%);
 
                     & > span {
-                        background-color: #f6ca9d;
-                        display: block;
-                        height: 12px;
-                        border-radius: 6px;
+                        background-color: var(--mi-theme, @mi-theme);
+                        .properties(height, 12);
+                        .border-radius(6);
                         position: relative;
-                        transition: all .4s cubic-bezier(.215, .61, .355,1);
+                        transition: all @mi-anim-duration cubic-bezier(.215, .61, .355,1);
                         position: absolute;
                         top: 50%;
-                        margin-top: -6px;
-                        left: 18px;
-                        width: 4px;
-                        display: -webkit-box;
-                        display: -moz-box;
-                        display: -ms-flexbox;
-                        display: -webkit-flex;
-                        display: flex;
-                        -webkit-justify-content: space-between;
-                        justify-content: space-between;
-                        -moz-justify-content: space-between;
-                        -ms-justify-content: space-between;
+                        .properties(margin-top, -6);
+                        .properties(left, 18);
+                        .properties(width, 4);
+                        .flex();
                     }
                 }
 			}
@@ -332,14 +319,14 @@
 
         &&-error {
 			animation-name: mi-anim-shake;
-			animation-duration: .4s;
+			animation-duration: @mi-anim-duration;
 			animation-timing-function: ease-in-out;
 			animation-iteration-count: 1.5;
 
 			.@{mi-captcha}-modal {
 				&-info canvas:last-child,
 				&-slider-btn {
-					transition: all .3s ease;
+					transition: all @mi-anim-duration ease;
 				}
 			}
 		}
@@ -348,7 +335,6 @@
 			.properties(font-size, 12);
 			.properties(line-height, 16);
             color: #fff;
-			.letter-spacing();
 
 			&-text {
 				.flex();
@@ -357,69 +343,43 @@
 					.properties(width, 20);
 					.properties(height, 20);
 					.properties(margin-right);
+                    border: 1px solid var(--mi-theme, @mi-theme);
+                    .border-radius-circle();
+                    .linear-gradient-background();
+                    overflow: hidden;
 
 					img {
-						.border-radius();
+                        transform: scale(1.1);
+						.border-radius-circle();
 					}
 				}
 			}
         }
+
+        &-tooltip {
+            z-index: @mi-z-index-modal;
+
+            .ant-tooltip {
+                &-inner {
+                    .border-radius(8);
+                    .linear-gradient-background();
+                }
+            }
+        }
     }
 }
 
-@keyframes mi-anim-move {
-    0% { transform: translate(1px, 1px) }
-    33.33% { transform: translate(51px, 1px) }
-    66.66% { transform: translate(21px, 51px) }
-    100% { transform: translate(1px, 1px) }
-}
-
-@keyframes mi-anim-scan {
-    0% {
-        .properties(top, 6);
-    }
-    50% {
-        .properties(top, 16);
-    }
-    100% {
-        .properties(top, 6);
-    }
-}
-
-@keyframes mi-anim-shake {
-    0% {
-        -webkit-transform: translate(0, 0) rotate(0);
-        -moz-transform: translate(0, 0) rotate(0);
-        -o-transform: translate(0, 0) rotate(0);
-        -ms-transform: translate(0, 0) rotate(0);
-        transform: translate(0, 0) rotate(0);
-    }
-    25% {
-        -webkit-transform: translate(-12px, 0) rotate(0);
-        -moz-transform: translate(-12px, 0) rotate(0);
-        -o-transform: translate(-12px, 0) rotate(0);
-        -ms-transform: translate(-12px, 0) rotate(0);
-        transform: translate(-12px, 0) rotate(0);
-    }
-    50% {
-        -webkit-transform: translate(0, 0) rotate(0);
-        -moz-transform: translate(0, 0) rotate(0);
-        -o-transform: translate(0, 0) rotate(0);
-        -ms-transform: translate(0, 0) rotate(0);
-        transform: translate(0, 0) rotate(0);
-    }
-    75% {
-        -webkit-transform: translate(-12px, 0) rotate(0);
-        -moz-transform: translate(-12px, 0) rotate(0);
-        -o-transform: translate(-12px, 0) rotate(0);
-        -ms-transform: translate(-12px, 0) rotate(0);
-        transform: translate(-12px, 0) rotate(0);
-    }
-    100% {
-        -webkit-transform: translate(0, 0) rotate(0);
-        -moz-transform: translate(0, 0) rotate(0);
-        -o-transform: translate(0, 0) rotate(0);
-        -ms-transform: translate(0, 0) rotate(0);
-        transform: translate(0, 0) rotate(0);
+.@{mi-lang-en} {
+    .@{mi-captcha} {
+        &-modal {
+            &-result {
+                &-error {
+                    .properties(bottom, -48);
+                    .properties(height, 48);
+                    .properties(padding-left, 8);
+                    .properties(padding-right, 8);
+                }
+            }
+        }
     }
 }
