@@ -17,10 +17,11 @@
 [![npm package](https://img.shields.io/npm/v/makeit-captcha.svg?style=flat-square)](https://www.npmjs.org/package/makeit-captcha)
 [![npm_downloads](http://img.shields.io/npm/dm/makeit-captcha.svg?style=flat-square)](http://www.npmtrends.com/makeit-captcha)
 ![MIT](https://img.shields.io/badge/license-MIT-ff69b4.svg)
-![webpack](https://img.shields.io/badge/webpack-5.11.0-orange.svg)
-![vue](https://img.shields.io/badge/vue-3.0.5-green.svg)
-![vite](https://img.shields.io/badge/vite-1.0.0-yellow.svg)
-![axios](https://img.shields.io/badge/axios-0.21.1-red.svg)
+![webpack](https://img.shields.io/badge/webpack-5.73.0-orange.svg)
+![vue](https://img.shields.io/badge/vue-3.2.36-green.svg)
+![vite](https://img.shields.io/badge/vite-2.9.13-yellow.svg)
+![axios](https://img.shields.io/badge/axios-0.27.2-red.svg)
+![ant design vue](https://img.shields.io/badge/ant%20design%20vue-3.x-blueviolet.svg)
 </div>
 
 ## 关于

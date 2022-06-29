@@ -90,7 +90,7 @@ module.exports = merge(baseConfig, {
 				test: /\.min.js(\?.*)?$/i
 			}),
 			new OptimizeCSSAssetsPlugin({
-				assetNameRegExp: /\.min\.css$/
+				test: /\.min\.css$/
 			})
 		]
 	}
