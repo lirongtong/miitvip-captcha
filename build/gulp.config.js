@@ -130,7 +130,7 @@ gulp.task('compile', gulp.series('compile-with-es', done => {
 }));
 
 gulp.task('concat-css', (done) => {
-    const stream = gulp.src([libDir + '/**/*.css', '../node_modules/makeit-tooltip/dist/tooltip.css'])
+    const stream = gulp.src([libDir + '/**/*.css'])
     .pipe(less())
     .pipe(sourcemaps.init())
     .pipe(autoprefixer({
@@ -143,7 +143,7 @@ gulp.task('concat-css', (done) => {
 });
 
 gulp.task('minify-css', (done) => {
-    gulp.src([libDir + '/**/*.css', '../node_modules/makeit-tooltip/dist/tooltip.css'])
+    gulp.src([libDir + '/**/*.css'])
     .pipe(sourcemaps.init())
     .pipe(autoprefixer({
         overrideBrowserslist: ['last 2 versions', 'ie > 8']
