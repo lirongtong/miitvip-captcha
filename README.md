@@ -50,42 +50,37 @@ app.mount('#app')
 ```vue
 <!-- 基础效果 -->
 <template>
-    <mi-captcha></mi-captcha>
+    <mi-captcha />
 </template>
 
 <!-- 自定义主题色 -->
 <template>
-    <mi-captcha theme-color="#2F9688"></mi-captcha>
+    <mi-captcha theme-color="#2F9688" />
 </template>
 
 <!-- 自定义初始化 / 校验等 -->
 <template>
     <mi-captcha theme-color="#be6be0"
-        init-action="v1/captcha/init"
-        @init="initAfter"
-        verify-action="v1/captcha/verification"
-        :verify-params="verifyParams">
-    </mi-captcha>
+        :init-action="api.captcha.init"
+        :verify-action="api.captcha.verification"
+        :verify-params="verifyParams"
+        @init="initAfter" />
 </template>
-```
 
-```ts
-import { defineComponent } from 'vue'
-export default defineComponent({
-    data() {
-        return {
-            verifyParams: {}
-        }
-    },
-    methods: {
-        initAfter(res) {
-            if (res.ret.code === 1) {
-                localStorage.setItem('mi-captcha-key', res.data.key)
-                this.verifyParams = {key: res.data.key}
-            }
-        }
-    }
+<script setup>
+import { reactive } from 'vue'
+
+const verifyParams = reactive({
+    key: null
 })
+
+const initAfter = (res) => {
+    if (res.ret.code === 200) {
+        localStorage.setItem('mi-captcha-key', res.data.key)
+        verifyParams.key = res.data.key
+    }
+}
+</script>
 ```
 
 ## 更多
