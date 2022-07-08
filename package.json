@@ -41,6 +41,7 @@
     "main": "lib/index.js",
     "module": "es/index.js",
     "unpkg": "dist/captcha.min.js",
+    "typings": "lib/index.d.ts",
     "scripts": {
         "dev": "vite",
         "declare": "webpack --config build/webpack.common.config.js --progress --color && rm -rf dist/makeit-captcha.min.js",

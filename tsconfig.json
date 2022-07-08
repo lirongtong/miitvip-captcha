@@ -21,6 +21,7 @@
 		"allowJs": true,
 		"resolveJsonModule": true,
         "baseUrl": "./",
+		"removeComments": true,
         "paths": {
 			"makeit-captcha": ["src/index.ts"],
 			"makeit-captcha/style": ["src/style.ts"]

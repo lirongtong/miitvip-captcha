@@ -10,10 +10,9 @@ const OptimizeCSSAssetsPlugin = require('css-minimizer-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const baseConfig = require('./webpack.base.config');
 const pkg = require('../package.json');
-const postcssConfig = require('../postcss.config');
 const banner = `${pkg.name} v${pkg.version}
 
-Copyright ${new Date().getFullYear()} makeit.vip <lirongtong@hotmail.com>.
+Copyright ${new Date().getFullYear()} makeit.vip <makeit@makeit.vip>.
 All rights reserved.
 @license MIT`;
 
