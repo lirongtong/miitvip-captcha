@@ -35,6 +35,7 @@ npm i makeit-captcha
 ```
 
 ## 使用
+
 ```ts
 import { createApp } from 'vue'
 import MakeitCaptcha from 'makeit-captcha'
@@ -47,41 +48,55 @@ app.mount('#app')
 ```
 
 ## 示例
-```vue
-<!-- 基础效果 -->
-<template>
-    <mi-captcha />
-</template>
 
-<!-- 自定义主题色 -->
-<template>
-    <mi-captcha theme-color="#2F9688" />
-</template>
-
+```Vue
 <!-- 自定义初始化 / 校验等 -->
 <template>
-    <mi-captcha theme-color="#be6be0"
-        :init-action="api.captcha.init"
-        :verify-action="api.captcha.verification"
-        :verify-params="verifyParams"
-        @init="initAfter" />
+    <div class="mi-captchas">
+
+        <!-- 基础效果 -->
+        <mi-captcha ref="captcha" />
+
+        <!-- 手动触发重置 -->
+        <a @click="reset" style="margin-bottom: 24px;text-align: center;display: block;">重置</a>
+
+        <!-- 自定义主题色 -->
+        <mi-captcha theme-color="#2F9688"
+            border-color="#2F9688"
+            box-shadow-color="#2F9688" />
+        
+        <!-- 自定义初始化 / 校验等 -->
+        <mi-captcha theme-color="#be6be0"
+            init-action="v1/captcha/init"
+            @init="initAfter"
+            verify-action="v1/captcha/verification"
+            :verify-params="params.verify" />
+    </div>
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+    import { ref, reactive } from 'vue'
 
-const verifyParams = reactive({
-    key: null
-})
+    const captcha = ref(null)
 
-const initAfter = (res) => {
-    if (res.ret.code === 200) {
-        localStorage.setItem('mi-captcha-key', res.data.key)
-        verifyParams.key = res.data.key
+    const params = reactive({
+        verify: { key: null }
+    })
+    
+    const initAfter = (res) => {
+        if (res?.ret?.code === 200) {
+            localStorage.setItem('mi-captcha-key', res?.data?.key)
+            params.verify.key = res?.data?.key
+        }
     }
-}
+
+    const reset = () => {
+        console.log('reinitialize')
+        captcha.value?.reset(false)
+    }
 </script>
 ```
 
 ## 更多
+
 > 更多定制化内容及使用请查看在线示例：[https://admin.makeit.vip/components/captcha](https://admin.makeit.vip/components/captcha)
