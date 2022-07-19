@@ -1,4 +1,4 @@
-const resolve = (module) => require.resolve(module);
+const resolve = (module) => require.resolve(module)
 module.exports = function(modules) {
     const presets = [
         [resolve("@babel/preset-env"), {
@@ -17,7 +17,8 @@ module.exports = function(modules) {
                 ]
             }
         }]
-    ];
+    ]
+    
     const plugins = [
         [resolve("@babel/plugin-transform-typescript"), {isTSX: true}],
         [resolve("@vue/babel-plugin-jsx"), {mergeProps: false}],
@@ -29,9 +30,10 @@ module.exports = function(modules) {
         resolve("@babel/plugin-proposal-class-properties"),
         resolve("@babel/plugin-syntax-dynamic-import"),
         [resolve("@babel/plugin-transform-runtime"), {helpers: false}]
-    ];
+    ]
+
     return {
         presets,
         plugins
     }
-};
+}

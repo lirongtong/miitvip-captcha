@@ -1,0 +1,156 @@
+// prefix.
+@mi-prefix: mi-;
+@mi-lang-en: ~'@{mi-prefix}lang-en-us';
+
+// font-size.
+@mi-font-size: 1rem;
+@mi-font-size-sm: 12px;
+@mi-font-size-normal: 14px;
+@mi-font-size-base: 16px;
+
+// gap.
+@mi-gap: 8px;
+
+// animation duration
+@mi-anim-duration: .4s;
+
+@mi-z-index: 20220511;
+@mi-z-index-top: 20220602;
+@mi-z-index-mask: 20220614;
+@mi-z-index-modal: 20220620;
+
+@mi-overflow-extend: 21px;
+
+// color.
+@mi-white: #fff;
+@mi-black: #000;
+
+// side menu.
+@mi-side-width: (@mi-gap * 32 / @mi-font-size-base) * @mi-font-size;
+@mi-side-height: (@mi-gap * 16 / @mi-font-size-base) * @mi-font-size;
+@mi-side-large-height: (@mi-gap * 24 / @mi-font-size-base) * @mi-font-size;
+@mi-side-width-scroll: ((@mi-gap * 34 + 1) / @mi-font-size-base) * @mi-font-size;
+@mi-side-width-sm: (@mi-gap * 10 / @mi-font-size-base) * @mi-font-size;
+@mi-side-width-sm-scroll: ((@mi-gap * 12 + 1) / @mi-font-size-base) * @mi-font-size;
+@mi-side-width-margin: (@mi-gap * 2 / @mi-font-size-base) * @mi-font-size;
+@mi-side-item-height: (@mi-gap * 6.25 / @mi-font-size-base) * @mi-font-size;
+@mi-side-logo-size: (@mi-gap * 4 / @mi-font-size-base) * @mi-font-size;
+@mi-side-logo-large-size: (@mi-gap * 8 / @mi-font-size-base) * @mi-font-size;
+
+// header.
+@mi-header-height: (@mi-gap * 6 / @mi-font-size-base) * @mi-font-size;
+@mi-header-avatar-size: (@mi-gap * 3 / @mi-font-size-base) * @mi-font-size;
+
+// content
+@mi-content-padding-top: (@mi-gap * 15 / @mi-font-size-base) * @mi-font-size;
+
+// font.
+@mi-font-color: #333;
+@mi-font-family: "Pingfang SC", "Microsoft YaHei", "Monospaced Number", "Chinese Quote", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", Helvetica, Arial, sans-serif;
+@mi-code-family: Lucida Console, Consolas, "Courier New", "Source Code Pro", "Miscrosoft Yahei", "Segoe UI", "Lucida Grande", Helvetica, Arial, FreeSans, Arimo, "Droid Sans", "wenquanyi micro hei", "Hiragino Sans GB", "Hiragino Sans GB W3", sans-serif;
+
+// flex.
+.flex(@align: center, @justify: center, @direction: row) {
+    display: flex;
+    align-items: @align;
+    justify-content: @justify;
+    flex-direction: @direction;
+}
+
+// border raiuds.
+.border-radius(@raduis: 4) {
+    border-radius: (@raduis / @mi-font-size-base) * @mi-font-size;
+}
+
+.border-radius-circle() {
+    border-radius: 50%;
+}
+
+.linear-gradient-background() {
+    background-color: var(--mi-dark, @mi-dark);
+    background-image: linear-gradient(315deg, var(--mi-black, @mi-black) 0%, var(--mi-pre-dark, @mi-pre-dark) 74%);
+}
+
+.linear-gradient-background-theme() {
+    background-color: var(--mi-theme, @mi-theme);
+    background-image: linear-gradient(127deg, var(--mi-gradient-s, @mi-gradient-s) 0%, var(--mi-gradient-m, @mi-gradient-m) 52%, var(--mi-gradient-e, @mi-gradient-e) 100%);
+}
+
+.linear-gradient-text() {
+    background: transparent linear-gradient(127deg, var(--mi-gradient-s, @mi-gradient-s) 0%, var(--mi-gradient-m, @mi-gradient-m) 52%, var(--mi-gradient-e, @mi-gradient-e) 100%);
+    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+// font size
+.font-size(@size: @mi-font-size-normal) {
+    font-size: (@size / @mi-font-size-base) * @mi-font-size;
+    line-height: ((@size + 4) / @mi-font-size-base) * @mi-font-size;
+}
+
+// linear-gradient
+.linear-gradient() {
+    background: linear-gradient(127deg, var(--mi-gradient-s, @mi-gradient-s) 0%, var(--mi-gradient-m, @mi-gradient-m) 52%, var(--mi-gradient-e, @mi-gradient-e) 100%);
+    color: linear-gradient(127deg, var(--mi-gradient-s, @mi-gradient-s) 0%, var(--mi-gradient-m, @mi-gradient-m) 52%, var(--mi-gradient-e, @mi-gradient-e) 100%);
+}
+
+// properties
+.properties(@key, @value: @mi-gap) {
+    @{key}: (@value / @mi-font-size-base) * @mi-font-size;
+}
+
+// text overflow ellipsis.
+.text-ellipsis() {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// letter spacing.
+.letter-spacing(@value: 2) {
+    .properties(letter-spacing, @value);
+}
+
+// tag
+.tag(@bgColor: #ff5500, @txtColor: @mi-white) {
+    background: @bgColor;
+    margin-right: 0;
+    .border-radius(16);
+    color: @txtColor;
+    .properties(line-height, 18);
+    .properties(max-width, 64);
+    .text-ellipsis();
+    .properties(padding-left);
+    .properties(padding-right);
+    .properties(font-size, 12);
+    .properties(height, 20);
+}
+
+@mi-theme: #f6ca9d;
+@mi-primary: @mi-theme;
+@mi-subsidiary: #808695;
+@mi-success: #2F9688;
+@mi-error: #ff4d4f;
+@mi-danger: #ed4014;
+@mi-warning: #ff9900;
+@mi-info: #2db7f5;
+@mi-selection: fade(@mi-theme, 80%);
+@mi-link: @mi-primary;
+@mi-font: @mi-white;
+@mi-ink: @mi-black;
+@mi-dark: #1d1e23;
+@mi-deep: #2d2f32;
+@mi-night: #3e3e3e;
+@mi-dawn: #4c4c4c;
+@mi-dark-grey: #333;
+@mi-light-grey: #949494;
+@mi-pre-dark: #434343;
+@mi-light-purple: #5a72af;
+@mi-light-blue: #8da6b8;
+@mi-gradient-s: #d2b27d;
+@mi-gradient-m: #f4d5a9;
+@mi-gradient-e: #d1a466;
+
+// captcha
+@mi-captcha-success-bg: fade(@mi-theme, 20%);

@@ -1,11 +1,12 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require('fs')
+const path = require('path')
 
 const configuration = (modules) => {
-    let config = {};
-    const file = path.resolve(path.dirname(process.cwd()), 'tsconfig.json');
+    let config = {}
+    const file = path.resolve(path.dirname(process.cwd()), 'tsconfig')
     if (fs.existsSync(file)) {
-        config = require(file);
+        config = require(file)
+        if (config.include && config.include instanceof Array) config.include.pop()
     }
     return Object.assign({...config.compilerOptions}, {
         noUnusedParameters: true,
@@ -17,7 +18,7 @@ const configuration = (modules) => {
         declaration: true,
         declarationDir: modules === false ? 'es' : 'lib',
         allowSyntheticDefaultImports: true
-    });
-};
+    })
+}
 
-module.exports = configuration;
+module.exports = configuration

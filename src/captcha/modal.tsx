@@ -1,34 +1,16 @@
 import { defineComponent, ref, reactive, onMounted, onBeforeUnmount, Transition } from 'vue'
 import { Tooltip } from 'ant-design-vue'
 import { CloseCircleOutlined, ReloadOutlined, QuestionCircleOutlined } from '@ant-design/icons-vue'
-import PropTypes from '../utils/props-types'
 import { getPrefixCls } from '../utils/props-tools'
 import { $tools } from '../utils/tools'
 import { $g } from '../utils/global'
 import { $request } from '../utils/request'
+import { captchaModalProps } from './props'
 
 const BACKGROUND = 'https://file.makeit.vip/MIIT/M00/00/00/ajRkHV7d0JOAJYSMAAFwUxGzMIc287.jpg'
 const POWERED = 'Powered By makeit.vip'
 const AVATAR = 'https://file.makeit.vip/MIIT/M00/00/00/ajRkHV_pUyOALE2LAAAtlj6Tt_s370.png'
 const TARGET = 'https://admin.makeit.vip/components/captcha'
-
-export const captchaModalProps = () => ({
-    prefixCls: PropTypes.string,
-    show: PropTypes.bool.def(false),
-    image: PropTypes.string,
-    position: PropTypes.object,
-    mask: PropTypes.bool.def(true),
-    maskClosable: PropTypes.bool.def(true),
-    themeColor: PropTypes.string,
-    bgColor: PropTypes.string,
-    boxShadow: PropTypes.bool.def(true),
-    boxShadowColor: PropTypes.string,
-    boxShadowBlur: PropTypes.number.def(6),
-    maxTries: PropTypes.number.def(5),
-    verifyParams: PropTypes.object.def({}),
-    verifyMethod: PropTypes.string.def('post'),
-    verifyAction: PropTypes.string
-})
 
 export default defineComponent({
     name: 'MiCaptchaModal',
@@ -40,14 +22,14 @@ export default defineComponent({
         const langCls = getPrefixCls(`lang-zh-cn`, props.prefixCls)
         const animation = getPrefixCls('anim-scale')
 
-        const modalRef = ref<InstanceType<typeof HTMLElement>>(null)
-        const maskRef = ref<InstanceType<typeof HTMLElement>>(null)
-        const contentRef = ref<InstanceType<typeof HTMLElement>>(null)
-        const sliderRef = ref<InstanceType<typeof HTMLElement>>(null)
-        const sliderBtnRef = ref<InstanceType<typeof HTMLElement>>(null)
-        const imageRef = ref<InstanceType<typeof HTMLElement>>(null)
-        const blockRef = ref<InstanceType<typeof HTMLElement>>(null)
-        const resultRef = ref<InstanceType<typeof HTMLElement>>(null)
+        const modalRef = ref(null)
+        const maskRef = ref(null)
+        const contentRef = ref(null)
+        const sliderRef = ref(null)
+        const sliderBtnRef = ref(null)
+        const imageRef = ref(null)
+        const blockRef = ref(null)
+        const resultRef = ref(null)
 
         const show = ref<boolean>(props.show)
 
@@ -59,7 +41,7 @@ export default defineComponent({
             mask: `${prefixCls}-mask`,
             result: `${prefixCls}-result`,
             content: `${prefixCls}-content`
-        }
+        } as { [index: string]: any }
         const params = reactive({
             loading: true,
             background: BACKGROUND,
@@ -109,7 +91,7 @@ export default defineComponent({
                 value: null
             },
             _background: null
-        })
+        }) as { [index: string]: any }
 
         onMounted(() => {
             init()
@@ -131,8 +113,8 @@ export default defineComponent({
 
         const initModal = () => {
             params.elements = {
-                slider: sliderBtnRef.value,
-                block: blockRef.value
+                slider: sliderBtnRef.value as any,
+                block: blockRef.value as any
             }
             params.block.real = params.block.size + params.block.radius * 2 + 2
             setCheckData()
@@ -158,8 +140,8 @@ export default defineComponent({
         }
 
         const initCaptcha = () => {
-            const image = imageRef.value as HTMLCanvasElement
-            const block = blockRef.value as HTMLCanvasElement
+            const image = imageRef.value as HTMLCanvasElement | null
+            const block = blockRef.value as HTMLCanvasElement | null
             const imageCtx = image ? image.getContext('2d') : null
             const blockCtx = block ? block.getContext('2d') : null
             params.ctx = { image: imageCtx, block: blockCtx }
@@ -194,7 +176,7 @@ export default defineComponent({
         const refreshCaptcha = () => {
             params.loading = true
             setCheckData()
-            const block = blockRef.value as HTMLCanvasElement
+            const block = blockRef.value as any
             block.width = params.size.width
             params.ctx.image.clearRect(0, 0, params.size.width, params.size.height)
             params.ctx.block.clearRect(0, 0, params.size.width, params.size.height)
@@ -216,9 +198,9 @@ export default defineComponent({
         }
 
         const image2Base64 = (callback: Function) => {
-            const elem = new Image()
+            const elem = new Image() as HTMLImageElement
             const canvas = document.createElement('canvas')
-            const ctx = canvas.getContext('2d')
+            const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
             canvas.width = params.size.width
             canvas.height = params.size.height
             elem.crossOrigin = ''
@@ -257,7 +239,7 @@ export default defineComponent({
                     params.block.real,
                     params.block.real
                 )
-                const block = blockRef.value as HTMLCanvasElement
+                const block = blockRef.value as HTMLCanvasElement | null
                 if (block) block.width = params.block.real
                 params.ctx.block.putImageData(imageData, params.coordinate.offset, coordinateY)
                 params.ctx.block.restore()
@@ -369,8 +351,8 @@ export default defineComponent({
 
         const dragStart = (evt: any) => {
             const x = evt.clientX || evt.touches[0].clientX
-            const sliderRect = getBoundingClientRect(sliderRef.value)
-            const sliderBtnRect = getBoundingClientRect(sliderBtnRef.value)
+            const sliderRect = getBoundingClientRect(sliderRef.value as any)
+            const sliderBtnRect = getBoundingClientRect(sliderBtnRef.value as any)
             params.drag.originX = Math.round(sliderRect.left * 10) / 10
             params.drag.originY = Math.round(sliderRect.top * 10) / 10
             params.drag.offset = Math.round((x - sliderBtnRect.left) * 10) / 10
@@ -443,7 +425,7 @@ export default defineComponent({
                     succcess()
                 }
             } else error()
-            const result = resultRef.value
+            const result = resultRef.value as HTMLElement | null
             if (result) result.style.bottom = '0'
             if (params.check.num <= params.check.tries) params.check.show = true
             setTimeout(() => {
@@ -469,7 +451,7 @@ export default defineComponent({
                 borderColor: props.themeColor
                     ? `transparent ${props.themeColor} transparent transparent`
                     : null
-            }
+            } as { [index: string]: any }
             return (
                 <div class={arrowCls}>
                     <div class={`${arrowCls}-out`} style={style} />
@@ -488,7 +470,7 @@ export default defineComponent({
                               props.boxShadowColor || props.themeColor
                           }`
                         : null
-            }
+            } as { [index: string]: any }
             return (
                 <div class={classes.content} style={style} ref={contentRef}>
                     <div class={`${prefixCls}-wrap`}>
@@ -530,7 +512,7 @@ export default defineComponent({
                             </div>
                         </div>
                     </div>
-                    <div class={`${loadingCls}-tip`}>{'正在加载验证码 ···'}</div>
+                    <div class={`${loadingCls}-tip`}>正在加载验证码 ···</div>
                 </div>
             ) : null
         }
@@ -623,10 +605,12 @@ export default defineComponent({
             return (
                 <div class={copyrightCls}>
                     <div class={`${copyrightCls}-text`}>
-                        <a href={params.target} target="_blank">
-                            <img src={params.avatar} alt={params.powered} />
-                        </a>
-                        <span>提供技术支持</span>
+                        <>
+                            <a href={params.target} target="_blank">
+                                <img src={params.avatar} alt={params.powered} />
+                            </a>
+                            <span>提供技术支持</span>
+                        </>
                     </div>
                 </div>
             )

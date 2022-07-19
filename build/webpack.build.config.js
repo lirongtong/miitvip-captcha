@@ -1,26 +1,26 @@
-const path = require('path');
-const resolve = (dir) => path.resolve(__dirname, '../', dir);
-const webpack = require('webpack');
-const { merge } = require('webpack-merge');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const TerserPlugin = require('terser-webpack-plugin');
-const CompressionPlugin = require('compression-webpack-plugin');
-const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-const OptimizeCSSAssetsPlugin = require('css-minimizer-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const baseConfig = require('./webpack.base.config');
-const pkg = require('../package.json');
-const banner = `${pkg.name} v${pkg.version}
+const path = require('path')
+const resolve = (dir) => path.resolve(__dirname, '../', dir)
+const webpack = require('webpack')
+const { merge } = require('webpack-merge')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const TerserPlugin = require('terser-webpack-plugin')
+const CompressionPlugin = require('compression-webpack-plugin')
+const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin')
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+const baseConfig = require('./webpack.base.config')
+const package = require(resolve('package.json'))
+const banner = `${package.name} ${package.version}
 
-Copyright ${new Date().getFullYear()} makeit.vip <makeit@makeit.vip>.
+Copyright 2020 - ${new Date().getFullYear()} makeit.vip <makeit@makeit.vip>.
 All rights reserved.
-@license MIT`;
+@license MIT`
 
-const entry = resolve('index');
-const distFileName = 'captcha';
+const entry = resolve('index')
+const distFileName = 'captcha'
 
 module.exports = merge(baseConfig, {
-	devtool: 'source-map',
+    devtool: 'source-map',
     mode: 'production',
     entry: {
         [`${distFileName}`]: entry,
@@ -32,32 +32,10 @@ module.exports = merge(baseConfig, {
         library: distFileName,
         libraryTarget: 'umd'
     },
-    externals: [
-        {
-            vue: {
-				root: 'Vue',
-				commonjs: 'vue',
-				commonjs2: 'vue',
-				amd: 'vue'
-            },
-			axios: {
-				root: 'Axios',
-				commonjs: 'axios',
-				commonjs2: 'axios',
-				amd: 'axios'
-			},
-			'@ant-design/icons-vue': {
-				root: '@AntDesign/IconsVue',
-				commonjs: '@ant-design/icons-vue',
-				commonjs2: '@ant-design/icons-vue',
-				amd: '@ant-design/icons-vue'
-			}
-        }
-    ],
     plugins: [
         new webpack.DefinePlugin({
 			'process.env.NODE_ENV': '"production"',
-			'process.env.MAKEIT_CAPTCHA_PREFIX': '"mi-"'
+			'process.env.MAKEIT_ADMIN_RPO_PREFIX': '"mi-"'
 		}),
 		new webpack.BannerPlugin({
 			banner
@@ -68,7 +46,7 @@ module.exports = merge(baseConfig, {
 		new CleanWebpackPlugin({
 			cleanOnceBeforeBuildPatterns: ['dist']
 		}),
-		new CaseSensitivePathsPlugin(),
+        new CaseSensitivePathsPlugin(),
         new webpack.optimize.ModuleConcatenationPlugin(),
         new webpack.LoaderOptionsPlugin({
             minimize: true,
@@ -83,14 +61,16 @@ module.exports = merge(baseConfig, {
         })
     ],
     optimization: {
-		minimizer: [
-			new TerserPlugin({
+        minimize: true,
+        minimizer: [
+            new TerserPlugin({
 				parallel: true,
 				test: /\.min.js(\?.*)?$/i
 			}),
-			new OptimizeCSSAssetsPlugin({
-				test: /\.min\.css$/
+			new CssMinimizerPlugin({
+                parallel: true,
+				test: /\.min\.css$/i
 			})
-		]
-	}
-});
+        ]
+    }
+})

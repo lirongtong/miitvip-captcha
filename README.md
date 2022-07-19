@@ -12,21 +12,26 @@
 
 <div align="center">
 
-基于 Vue3.0 + Vite 开发，动态生成验证滑块的验证码组件
+基于 Vue3.x + Vite2.x 开发，动态生成验证滑块的验证码组件
 
 [![npm package](https://img.shields.io/npm/v/makeit-captcha.svg?style=flat-square)](https://www.npmjs.org/package/makeit-captcha)
 [![npm_downloads](http://img.shields.io/npm/dm/makeit-captcha.svg?style=flat-square)](http://www.npmtrends.com/makeit-captcha)
 ![MIT](https://img.shields.io/badge/license-MIT-ff69b4.svg)
 ![webpack](https://img.shields.io/badge/webpack-5.73.0-orange.svg)
-![vue](https://img.shields.io/badge/vue-3.2.36-green.svg)
-![vite](https://img.shields.io/badge/vite-2.9.13-yellow.svg)
+![vue](https://img.shields.io/badge/vue-3.2.37-green.svg)
+![vite](https://img.shields.io/badge/vite-2.9.9-yellow.svg)
 ![axios](https://img.shields.io/badge/axios-0.27.2-red.svg)
 ![ant design vue](https://img.shields.io/badge/ant%20design%20vue-3.x-blueviolet.svg)
 </div>
 
 ## 关于
 
-> Makeit Captcha 滑块验证码组件，是基于 Vue3.0 + Vite + Canvas 开发，动态生成验证滑块，结合后端进行二次校验，能有效避免被恶意抓取后的模拟验证，进一步提升验证码的可靠性。
+> Makeit Captcha 2.x 滑块验证码组件，基于 Vue3.x + Vite2.x + Canvas 开发，动态生成验证滑块，结合后端进行二次校验，能有效避免被恶意抓取后的模拟验证，进一步提升验证码的可靠性。
+
+- [x] 自定义主题配色 :evergreen_tree:
+- [x] 自定义初始化验证码 :sparkling_heart:
+- [x] 自动逸远程校验结果 :collis
+- [x] 动态配置验证码弹窗背景图 :hibiscus:
 
 ## 安装
 

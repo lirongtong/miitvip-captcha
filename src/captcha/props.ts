@@ -33,3 +33,21 @@ export const captchaProps = () => ({
     checkAction: PropTypes.string,
     checkMethod: PropTypes.oneOf(tuple(...$g.methods)).def('post')
 })
+
+export const captchaModalProps = () => ({
+    prefixCls: PropTypes.string,
+    show: PropTypes.bool.def(false),
+    image: PropTypes.string,
+    position: PropTypes.object,
+    mask: PropTypes.bool.def(true),
+    maskClosable: PropTypes.bool.def(true),
+    themeColor: PropTypes.string,
+    bgColor: PropTypes.string,
+    boxShadow: PropTypes.bool.def(true),
+    boxShadowColor: PropTypes.string,
+    boxShadowBlur: PropTypes.number.def(6),
+    maxTries: PropTypes.number.def(5),
+    verifyParams: PropTypes.object.def({}),
+    verifyMethod: PropTypes.string.def('post'),
+    verifyAction: PropTypes.string
+})

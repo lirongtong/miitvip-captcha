@@ -1,2 +1,2 @@
-import 'ant-design-vue/es/tooltip/style'
+import './extra.less'
 import './index.less'
