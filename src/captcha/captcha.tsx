@@ -1,47 +1,14 @@
 import { defineComponent, computed, reactive, Teleport, ref, onMounted, onBeforeUnmount } from 'vue'
 import { VerifiedOutlined } from '@ant-design/icons-vue'
-import PropTypes from '../utils/props-types'
-import { getPrefixCls, tuple } from '../utils/props-tools'
+import { getPrefixCls } from '../utils/props-tools'
 import { $tools } from '../utils/tools'
-import { $g } from '../utils/global'
+import { captchaProps } from './props'
 import { $request } from '../utils/request'
 import MiCaptchaModal from './modal'
 
 const POWERED = 'Powered By makeit.vip'
 const AVATAR = 'https://file.makeit.vip/MIIT/M00/00/00/ajRkHV_pUyOALE2LAAAtlj6Tt_s370.png'
 const TARGET = 'https://admin.makeit.vip/components/captcha'
-
-export const captchaProps = () => ({
-    prefixCls: PropTypes.string,
-    width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).def(320),
-    height: PropTypes.number,
-    radius: PropTypes.number.def(48),
-    themeColor: PropTypes.string,
-    bgColor: PropTypes.string,
-    borderColor: PropTypes.string,
-    textColor: PropTypes.string,
-    boxShadow: PropTypes.bool.def(true),
-    boxShadowColor: PropTypes.string,
-    boxShadowBlur: PropTypes.number.def(4),
-    modalBgColor: PropTypes.string,
-    modalBoxShadow: PropTypes.bool.def(true),
-    modalBoxShadowColor: PropTypes.string,
-    modalBoxShadowBlur: PropTypes.number,
-    image: PropTypes.string,
-    logo: PropTypes.string,
-    mask: PropTypes.bool.def(true),
-    maskClosable: PropTypes.bool.def(true),
-    maxTries: PropTypes.number.def(5),
-    initParams: PropTypes.object.def({}),
-    initAction: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
-    initMethod: PropTypes.oneOf(tuple(...$g.methods)).def('get'),
-    verifyParams: PropTypes.object.def({}),
-    verifyAction: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
-    verifyMethod: PropTypes.oneOf(tuple(...$g.methods)).def('post'),
-    checkParams: PropTypes.object.def({}),
-    checkAction: PropTypes.string,
-    checkMethod: PropTypes.oneOf(tuple(...$g.methods)).def('post')
-})
 
 export default defineComponent({
     name: 'MiCaptcha',

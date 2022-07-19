@@ -58,7 +58,7 @@ app.mount('#app')
         <mi-captcha ref="captcha" />
 
         <!-- 手动触发重置 -->
-        <a @click="reset" style="margin-bottom: 24px;text-align: center;display: block;">重置</a>
+        <a @click="reset">重置</a>
 
         <!-- 自定义主题色 -->
         <mi-captcha theme-color="#2F9688"
