@@ -30,7 +30,7 @@
 
 - [x] 自定义主题配色 :evergreen_tree:
 - [x] 自定义初始化验证码 :sparkling_heart:
-- [x] 自动逸远程校验结果 :collis:
+- [x] 自动逸远程校验结果 :collision:
 - [x] 动态配置验证码弹窗背景图 :hibiscus:
 
 ## 安装
