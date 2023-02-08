@@ -1,6 +1,6 @@
 import { App, Plugin } from 'vue'
 
-export const install = <T>(component: T, alias?: string) => {
+export const install = <T extends object>(component: T, alias?: string) => {
     const C = component as any
     C.install = (app: App) => {
         app.component(C.name, component)

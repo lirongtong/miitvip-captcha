@@ -4,8 +4,10 @@
         <a @click="reset" style="margin-bottom: 24px;text-align: center;display: block;">重置</a>
         <mi-captcha theme-color="#2F9688"
             border-color="#2F9688"
+            modal-bg-color="linear-gradient(315deg, #153c37 0%, #2f9688 74%)"
             box-shadow-color="#2F9688" />
         <mi-captcha theme-color="#be6be0"
+            modal-bg-color="linear-gradient(315deg, #d6b35c 0%, #be6be0 74%)"
             init-action="v1/captcha/init"
             @init="initAfter"
             verify-action="v1/captcha/verification"

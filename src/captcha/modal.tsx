@@ -3,14 +3,11 @@ import { Tooltip } from 'ant-design-vue'
 import { CloseCircleOutlined, ReloadOutlined, QuestionCircleOutlined } from '@ant-design/icons-vue'
 import { getPrefixCls } from '../utils/props-tools'
 import { $tools } from '../utils/tools'
-import { $g } from '../utils/global'
+import { $g, MI_POWERED, MI_TARGET } from '../utils/global'
 import { $request } from '../utils/request'
 import { captchaModalProps } from './props'
-
-const BACKGROUND = 'https://file.makeit.vip/MIIT/M00/00/00/ajRkHV7d0JOAJYSMAAFwUxGzMIc287.jpg'
-const POWERED = 'Powered By makeit.vip'
-const AVATAR = 'https://file.makeit.vip/MIIT/M00/00/00/ajRkHV_pUyOALE2LAAAtlj6Tt_s370.png'
-const TARGET = 'https://admin.makeit.vip/components/captcha'
+import avatar from '../assets/images/logo.png'
+import background from '../assets/images/background.jpg'
 
 export default defineComponent({
     name: 'MiCaptchaModal',
@@ -44,10 +41,10 @@ export default defineComponent({
         } as { [index: string]: any }
         const params = reactive({
             loading: true,
-            background: BACKGROUND,
-            avatar: AVATAR,
-            powered: POWERED,
-            target: TARGET,
+            background,
+            avatar: null,
+            powered: MI_POWERED,
+            target: MI_TARGET,
             ctx: {
                 image: null,
                 block: null
@@ -92,6 +89,10 @@ export default defineComponent({
             },
             _background: null
         }) as { [index: string]: any }
+
+        $tools.image2Base64(avatar, (img: any) => {
+            params.avatar = img
+        })
 
         onMounted(() => {
             init()
@@ -201,11 +202,11 @@ export default defineComponent({
             const elem = new Image() as HTMLImageElement
             const canvas = document.createElement('canvas')
             const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-            canvas.width = params.size.width
-            canvas.height = params.size.height
             elem.crossOrigin = ''
             elem.src = params._background
             elem.onload = () => {
+                canvas.width = params.size.width
+                canvas.height = params.size.height
                 ctx.drawImage(elem, 0, 0, params.size.width, params.size.height)
                 params._background = canvas.toDataURL()
                 callback && callback()

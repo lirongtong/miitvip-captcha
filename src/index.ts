@@ -9,6 +9,6 @@ const install = (app: App) => {
 export { Captcha }
 
 export default {
-    version: '2.0.1',
+    version: '2.0.4',
     install
 }

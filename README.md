@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://admin.makeit.vip/">
-        <img width="200" src="https://file.makeit.vip/MIIT/M00/00/00/ajRkHV_pUyOALE2LAAAtlj6Tt_s370.png">
+        <img width="200" src="https://file.makeit.vip/MIITVIP/M00/00/00/K4vDRGPcbmmAG8_sAAAtlj6Tt_s562.png">
     </a>
 </p>
 
@@ -12,7 +12,7 @@
 
 <div align="center">
 
-基于 Vue3.x + Vite2.x 开发，动态生成验证滑块的验证码组件
+基于 Vue3.x + Vite4.x 开发，动态生成验证滑块的验证码组件
 
 [![npm package](https://img.shields.io/npm/v/makeit-captcha.svg?style=flat-square)](https://www.npmjs.org/package/makeit-captcha)
 [![npm_downloads](http://img.shields.io/npm/dm/makeit-captcha.svg?style=flat-square)](http://www.npmtrends.com/makeit-captcha)
@@ -26,7 +26,7 @@
 
 ## 关于
 
-> Makeit Captcha 2.x 滑块验证码组件，基于 Vue3.x + Vite2.x + Canvas 开发，动态生成验证滑块，结合后端进行二次校验，能有效避免被恶意抓取后的模拟验证，进一步提升验证码的可靠性。
+> Makeit Captcha 2.x 滑块验证码组件，基于 Vue3.x + Vite4.x + Canvas 开发，动态生成验证滑块，结合后端进行二次校验，能有效避免被恶意抓取后的模拟验证，进一步提升验证码的可靠性。
 
 :white_check_mark: 自定义主题配色 :evergreen_tree:
 

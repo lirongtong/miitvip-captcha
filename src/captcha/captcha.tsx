@@ -3,13 +3,10 @@ import { VerifiedOutlined } from '@ant-design/icons-vue'
 import { captchaProps } from './props'
 import { getPrefixCls } from '../utils/props-tools'
 import { $tools } from '../utils/tools'
-import { $g } from '../utils/global'
+import { $g, MI_POWERED, MI_TARGET } from '../utils/global'
 import { $request } from '../utils/request'
 import MiCaptchaModal from './modal'
-
-const POWERED = 'Powered By makeit.vip'
-const AVATAR = 'https://file.makeit.vip/MIIT/M00/00/00/ajRkHV_pUyOALE2LAAAtlj6Tt_s370.png'
-const TARGET = 'https://admin.makeit.vip/components/captcha'
+import avatar from '../assets/images/logo.png'
 
 export default defineComponent({
     name: 'MiCaptcha',
@@ -31,9 +28,9 @@ export default defineComponent({
             ) as any
         })
         const params = reactive({
-            avatar: AVATAR,
-            powered: POWERED,
-            target: TARGET,
+            avatar: null,
+            powered: MI_POWERED,
+            target: MI_TARGET,
             init: false,
             failed: false,
             pass: false,
@@ -55,6 +52,10 @@ export default defineComponent({
             },
             verifyParams: { ...props.verifyParams }
         }) as { [index: string]: any }
+
+        $tools.image2Base64(avatar, (img: any) => {
+            params.avatar = img
+        })
 
         onBeforeUnmount(() => {
             closeCaptchaModal({ status: 'close' })

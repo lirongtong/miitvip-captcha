@@ -7,9 +7,11 @@ import {
     QqOutlined,
     GoogleOutlined
 } from '@ant-design/icons-vue'
+import avatar from '../assets/images/logo.png'
 
 export const MI_POWERED = 'Powered By makeit.vip'
-export const MI_AVATAT = 'https://file.makeit.vip/MIIT/M00/00/00/ajRkHV_pUyOALE2LAAAtlj6Tt_s370.png'
+export const MI_AVATAT = avatar
+export const MI_TARGET = 'https://admin.makeit.vip/components/captcha'
 
 const now = new Date().getFullYear()
 
