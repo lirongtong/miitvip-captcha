@@ -3,11 +3,9 @@ import { Tooltip } from 'ant-design-vue'
 import { CloseCircleOutlined, ReloadOutlined, QuestionCircleOutlined } from '@ant-design/icons-vue'
 import { getPrefixCls } from '../utils/props-tools'
 import { $tools } from '../utils/tools'
-import { $g, MI_POWERED, MI_TARGET } from '../utils/global'
+import { $g, MI_POWERED, MI_TARGET, MI_DEFAULT_AVATAT, MI_DEFAULT_BACKGROUND } from '../utils/global'
 import { $request } from '../utils/request'
 import { captchaModalProps } from './props'
-import avatar from '../assets/images/logo.png'
-import background from '../assets/images/background.jpg'
 
 export default defineComponent({
     name: 'MiCaptchaModal',
@@ -41,8 +39,8 @@ export default defineComponent({
         } as { [index: string]: any }
         const params = reactive({
             loading: true,
-            background,
-            avatar: null,
+            background: MI_DEFAULT_BACKGROUND,
+            avatar: MI_DEFAULT_AVATAT,
             powered: MI_POWERED,
             target: MI_TARGET,
             ctx: {
@@ -89,10 +87,6 @@ export default defineComponent({
             },
             _background: null
         }) as { [index: string]: any }
-
-        $tools.image2Base64(avatar, (img: any) => {
-            params.avatar = img
-        })
 
         onMounted(() => {
             init()

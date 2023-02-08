@@ -414,20 +414,6 @@ class MiTools {
         temp = null
         return output
     }
-
-    image2Base64(link: any, callback?: Function) {
-        const elem = new Image() as HTMLImageElement
-        elem.src = link
-        const canvas = document.createElement('canvas')
-        const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-        elem.crossOrigin = ''
-        elem.onload = () => {
-            canvas.width = elem.width
-            canvas.height = elem.height
-            ctx.drawImage(elem, 0, 0, elem.width, elem.height)
-            callback && callback(canvas.toDataURL())
-        }
-    }
 }
 
 export const $tools: MiTools = new MiTools()

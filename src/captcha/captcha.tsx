@@ -3,10 +3,9 @@ import { VerifiedOutlined } from '@ant-design/icons-vue'
 import { captchaProps } from './props'
 import { getPrefixCls } from '../utils/props-tools'
 import { $tools } from '../utils/tools'
-import { $g, MI_POWERED, MI_TARGET } from '../utils/global'
+import { $g, MI_POWERED, MI_TARGET, MI_DEFAULT_AVATAT } from '../utils/global'
 import { $request } from '../utils/request'
 import MiCaptchaModal from './modal'
-import avatar from '../assets/images/logo.png'
 
 export default defineComponent({
     name: 'MiCaptcha',
@@ -28,7 +27,7 @@ export default defineComponent({
             ) as any
         })
         const params = reactive({
-            avatar: null,
+            avatar: MI_DEFAULT_AVATAT,
             powered: MI_POWERED,
             target: MI_TARGET,
             init: false,
@@ -52,10 +51,6 @@ export default defineComponent({
             },
             verifyParams: { ...props.verifyParams }
         }) as { [index: string]: any }
-
-        $tools.image2Base64(avatar, (img: any) => {
-            params.avatar = img
-        })
 
         onBeforeUnmount(() => {
             closeCaptchaModal({ status: 'close' })

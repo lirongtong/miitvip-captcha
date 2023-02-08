@@ -7,10 +7,12 @@ import {
     QqOutlined,
     GoogleOutlined
 } from '@ant-design/icons-vue'
-import avatar from '../assets/images/logo.png'
+import { logo } from './logo'
+import { background } from './background'
 
+export const MI_DEFAULT_AVATAT = logo
+export const MI_DEFAULT_BACKGROUND = background
 export const MI_POWERED = 'Powered By makeit.vip'
-export const MI_AVATAT = avatar
 export const MI_TARGET = 'https://admin.makeit.vip/components/captcha'
 
 const now = new Date().getFullYear()
@@ -47,8 +49,8 @@ export const $g = reactive({
      */
     prefix: 'mi-',
 
-    logo: MI_AVATAT,
-    avatar: MI_AVATAT,
+    logo: MI_DEFAULT_AVATAT,
+    avatar: MI_DEFAULT_AVATAT,
 
     /**
      * 加密盐值 ( 可自行通过 env 配置进行覆盖 ).
