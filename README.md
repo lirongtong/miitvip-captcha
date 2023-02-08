@@ -18,9 +18,9 @@
 [![npm_downloads](http://img.shields.io/npm/dm/makeit-captcha.svg?style=flat-square)](http://www.npmtrends.com/makeit-captcha)
 ![MIT](https://img.shields.io/badge/license-MIT-ff69b4.svg)
 ![webpack](https://img.shields.io/badge/webpack-5.73.0-orange.svg)
-![vue](https://img.shields.io/badge/vue-3.2.37-green.svg)
-![vite](https://img.shields.io/badge/vite-2.9.9-yellow.svg)
-![axios](https://img.shields.io/badge/axios-0.27.2-red.svg)
+![vue](https://img.shields.io/badge/vue-3.2.47-green.svg)
+![vite](https://img.shields.io/badge/vite-4.1.1-yellow.svg)
+![axios](https://img.shields.io/badge/axios-1.3.2-red.svg)
 ![ant design vue](https://img.shields.io/badge/ant%20design%20vue-3.x-blueviolet.svg)
 </div>
 
