@@ -3,7 +3,13 @@ import { Tooltip } from 'ant-design-vue'
 import { CloseCircleOutlined, ReloadOutlined, QuestionCircleOutlined } from '@ant-design/icons-vue'
 import { getPrefixCls } from '../utils/props-tools'
 import { $tools } from '../utils/tools'
-import { $g, MI_POWERED, MI_TARGET, MI_DEFAULT_AVATAT, MI_DEFAULT_BACKGROUND } from '../utils/global'
+import {
+    $g,
+    MI_POWERED,
+    MI_TARGET,
+    MI_DEFAULT_AVATAT,
+    MI_DEFAULT_BACKGROUND
+} from '../utils/global'
 import { $request } from '../utils/request'
 import { captchaModalProps } from './props'
 
@@ -404,7 +410,8 @@ export default defineComponent({
                 if (props.verifyAction) {
                     await $request[props.verifyMethod.toLowerCase()](
                         props.verifyAction,
-                        props.verifyParams
+                        props.verifyParams,
+                        props.actionConfig
                     )
                         .then((res: any) => {
                             if (res.ret.code === 200) {
