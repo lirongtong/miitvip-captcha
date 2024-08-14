@@ -24,6 +24,11 @@
 ![ant design vue](https://img.shields.io/badge/ant%20design%20vue-3.x-blueviolet.svg)
 </div>
 
+## 注
+
+> 独立组件不再更新
+> 请使用 [Makeit Admin Pro - Captcha](https://admin.makeit.vip/component/captcha) 组件
+
 ## 关于
 
 > Makeit Captcha 2.x 滑块验证码组件，基于 Vue3.x + Vite4.x + Canvas 开发，动态生成验证滑块，结合后端进行二次校验，能有效避免被恶意抓取后的模拟验证，进一步提升验证码的可靠性。
