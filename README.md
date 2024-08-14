@@ -27,6 +27,7 @@
 ## 注
 
 > 独立组件不再更新
+>
 > 请使用 [Makeit Admin Pro - Captcha](https://admin.makeit.vip/component/captcha) 组件
 
 ## 关于
