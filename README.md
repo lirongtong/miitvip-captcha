@@ -1,10 +1,3 @@
-# 🚨 Deprecated: Please use `@miitvip/captcha` instead
-
-> 该独立组件已不再更新（This package (`makeit-captcha`) is no longer maintained.）
->
-> 👉 新版本在这里（The new and actively maintained version is available here）：
-> 🔗 https://www.npmjs.com/package/@miitvip/captcha
-
 <p align="center">
     <a href="https://admin.makeit.vip/">
         <img width="200" src="https://file.makeit.vip/MIITVIP/M00/00/00/K4vDRGPcbmmAG8_sAAAtlj6Tt_s562.png">
@@ -19,21 +12,22 @@
 
 <div align="center">
 
-基于 Vue3.x + Vite4.x 开发，动态生成验证滑块的验证码组件
+基于 Vue3.x + Vite6.x 开发，动态生成验证滑块的验证码组件
 
-[![npm package](https://img.shields.io/npm/v/makeit-captcha.svg?style=flat-square)](https://www.npmjs.org/package/makeit-captcha)
-[![npm_downloads](http://img.shields.io/npm/dm/makeit-captcha.svg?style=flat-square)](http://www.npmtrends.com/makeit-captcha)
+[![npm package](https://img.shields.io/npm/v/@miitvip/captcha.svg?style=flat-square)](https://www.npmjs.org/package/@miitvip/captcha)
+[![npm_downloads](http://img.shields.io/npm/dm/@miitvip/captcha.svg?style=flat-square)](http://www.npmtrends.com/@miitvip/captcha)
 ![MIT](https://img.shields.io/badge/license-MIT-ff69b4.svg)
-![webpack](https://img.shields.io/badge/webpack-5.73.0-orange.svg)
-![vue](https://img.shields.io/badge/vue-3.2.47-green.svg)
-![vite](https://img.shields.io/badge/vite-4.1.1-yellow.svg)
-![axios](https://img.shields.io/badge/axios-1.3.2-red.svg)
-![ant design vue](https://img.shields.io/badge/ant%20design%20vue-3.x-blueviolet.svg)
+![node](https://img.shields.io/badge/node-22.17.0-orange.svg)
+![vue](https://img.shields.io/badge/vue-3.5.17-green.svg)
+![vite](https://img.shields.io/badge/vite-6.3.5-yellow.svg)
+![axios](https://img.shields.io/badge/axios-1.10.0-red.svg)
+![ant design vue](https://img.shields.io/badge/ant%20design%20vue-4.x-blueviolet.svg)
+
 </div>
 
 ## 关于
 
-> Makeit Captcha 2.x 滑块验证码组件，基于 Vue3.x + Vite4.x + Canvas 开发，动态生成验证滑块，结合后端进行二次校验，能有效避免被恶意抓取后的模拟验证，进一步提升验证码的可靠性。
+> Makeit Captcha 滑块验证码组件，基于 Vue3.x + Vite6.x + Canvas 开发，动态生成验证滑块，结合后端进行二次校验，能有效避免被恶意抓取后的模拟验证，进一步提升验证码的可靠性。
 
 :white_check_mark: 自定义主题配色 :evergreen_tree:
 
@@ -64,11 +58,10 @@ app.mount('#app')
 
 ## 示例
 
-```Vue
+```html
 <!-- 自定义初始化 / 校验等 -->
 <template>
     <div class="mi-captchas">
-
         <!-- 基础效果 -->
         <mi-captcha ref="captcha" />
 
@@ -76,16 +69,16 @@ app.mount('#app')
         <a @click="reset">重置</a>
 
         <!-- 自定义主题色 -->
-        <mi-captcha theme-color="#2F9688"
-            border-color="#2F9688"
-            box-shadow-color="#2F9688" />
-        
+        <mi-captcha theme-color="#2F9688" border-color="#2F9688" box-shadow-color="#2F9688" />
+
         <!-- 自定义初始化 / 校验等 -->
-        <mi-captcha theme-color="#be6be0"
+        <mi-captcha
+            theme-color="#be6be0"
             init-action="v1/captcha/init"
             @init="initAfter"
             verify-action="v1/captcha/verification"
-            :verify-params="params.verify" />
+            :verify-params="params.verify"
+        />
     </div>
 </template>
 
@@ -97,7 +90,7 @@ app.mount('#app')
     const params = reactive({
         verify: { key: null }
     })
-    
+
     const initAfter = (res) => {
         if (res?.ret?.code === 200) {
             localStorage.setItem('mi-captcha-key', res?.data?.key)

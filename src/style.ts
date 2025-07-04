@@ -1,1 +1,0 @@
-import './captcha/style'

@@ -1,7 +1,7 @@
-import { App, Plugin } from 'vue'
+import type { App, Plugin } from 'vue'
 
-export const install = <T extends object>(component: T, alias?: string) => {
-    const C = component as any
+export const install = <T extends { name: string }>(component: T, alias?: string): T & Plugin => {
+    const C = component as Plugin & T
     C.install = (app: App) => {
         app.component(C.name, component)
         if (alias) app.config.globalProperties[alias] = component

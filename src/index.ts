@@ -1,14 +1,15 @@
-import { App } from 'vue'
+import type { App } from 'vue'
+import { setupI18n } from './i18n'
 import { default as Captcha } from './captcha'
 
 const install = (app: App) => {
+    setupI18n(app)
     app.use(Captcha)
     return app
 }
 
-export { Captcha }
-
 export default {
-    version: '2.0.4',
-    install
+    version: '1.0.0',
+    install,
+    Captcha
 }

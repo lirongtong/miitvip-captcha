@@ -1,266 +1,307 @@
-import { defineComponent, computed, reactive, Teleport, ref, onMounted, onBeforeUnmount } from 'vue'
-import { VerifiedOutlined } from '@ant-design/icons-vue'
-import { captchaProps } from './props'
-import { getPrefixCls } from '../utils/props-tools'
+import {
+    computed,
+    defineComponent,
+    ref,
+    reactive,
+    Fragment,
+    Teleport,
+    Transition,
+    onMounted,
+    onUnmounted
+} from 'vue'
+import { CaptchaProps } from './props'
+import { $g } from '../utils/global'
 import { $tools } from '../utils/tools'
-import { $g, MI_POWERED, MI_TARGET, MI_DEFAULT_AVATAT } from '../utils/global'
+import useWindowResize from '../hooks/useWindowResize'
+import type { Position, ResponseData } from '../utils/types'
+import { getPrefixCls } from '../utils/props'
+import { useI18n } from 'vue-i18n'
 import { $request } from '../utils/request'
+import { message } from 'ant-design-vue'
+import { VerifiedOutlined } from '@ant-design/icons-vue'
 import MiCaptchaModal from './modal'
+import styled from './style/captcha.module.less'
 
-export default defineComponent({
+const MiCaptcha = defineComponent({
     name: 'MiCaptcha',
     inheritAttrs: false,
-    props: captchaProps(),
+    props: CaptchaProps(),
     emits: ['init', 'checked', 'success'],
-    setup(props, { emit, attrs, expose }) {
-        const prefixCls = getPrefixCls('captcha', props.prefixCls)
-        const captchaRef = ref(null)
-        const captchaModalRef = ref(null)
-        const themeColorStyle = computed(() => {
-            return (
-                props.themeColor
-                    ? {
-                          backgroundColor: props.themeColor,
-                          boxShadow: `inset 0 0 0 1px ${props.themeColor}`
-                      }
-                    : null
-            ) as any
+    setup(props, { emit, expose, attrs }) {
+        const { t, te } = useI18n()
+        const { width } = useWindowResize()
+        const uniqueKey = $tools.uid()
+        const size = computed(() => {
+            return {
+                width: $tools.convert2rem($tools.distinguishSize(props.width, width.value)),
+                height: $tools.convert2rem($tools.distinguishSize(props.height, width.value))
+            }
         })
+        const radius = computed(() => {
+            return $tools.convert2rem($tools.distinguishSize(props.radius, width.value))
+        })
+        const radarStyle = computed(() => {
+            return {
+                borderRadius: radius.value,
+                boxShadow: props.boxShadow
+                    ? props.color
+                        ? `0 0 .25rem ${props.color}`
+                        : undefined
+                    : 'none',
+                borderColor: props.color ?? undefined
+            }
+        })
+        const successStyle = computed(() => {
+            const background = props.color
+                ? $g.regExp.hex.test(props.color)
+                    ? $tools.colorHex2Rgba(props.color, 0.2)
+                    : $g.regExp.rgb.test(props.color)
+                      ? $tools.colorHex2Rgba($tools.colorRgb2Hex(props.color), 0.2)
+                      : props.color
+                : undefined
+            return {
+                borderRadius: radius.value,
+                background,
+                borderColor: props.color ?? undefined
+            }
+        })
+        const captchaRef = ref(null)
+        const captchaContentRef = ref(null)
+        const captchaModalRef = ref(null)
         const params = reactive({
-            avatar: MI_DEFAULT_AVATAT,
-            powered: MI_POWERED,
-            target: MI_TARGET,
+            anim: getPrefixCls('anim-slit'),
             init: false,
             failed: false,
             pass: false,
-            tip: props.initAction ? '正在初始化验证码 ···' : '点击按钮进行验证',
-            timer: null,
+            modal: {
+                open: false,
+                position: {} as Position
+            },
+            offset: {
+                top: 22.5,
+                left: 48
+            },
+            tip: props.initAction ? t('captcha.init') : t('captcha.click'),
             status: {
                 ready: true,
                 scanning: false,
                 being: false,
                 success: false
             },
-            offset: {
-                top: 22.5,
-                left: 48
-            },
-            modal: {
-                show: false,
-                pos: {}
-            },
-            verifyParams: { ...props.verifyParams }
-        }) as { [index: string]: any }
-
-        onBeforeUnmount(() => {
-            closeCaptchaModal({ status: 'close' })
-            $tools.off(window, 'resize', resize)
+            verifyParams: { ...props.verifyParams },
+            actionConfig: { ...props.actionConfig }
         })
 
-        onMounted(() => {
-            initCaptcha()
-            $tools.on(window, 'resize', resize)
+        const themeColorStyle = computed(() => {
+            return props.color
+                ? {
+                      backgroundColor: props.color,
+                      boxShadow: `inset 0 0 0 .0625rem ${props.color}`
+                  }
+                : null
         })
 
-        const initCaptcha = () => {
-            const afterInit = (tip = '点击按钮进行验证') => {
-                params.failed = false
+        const tt = (key: string, fallback: string) => (te(key) ? t(key) : fallback)
+
+        const initCaptcha = async () => {
+            const afterInit = (tip = t('captcha.click'), failed = false) => {
+                params.failed = failed
                 params.init = true
-                params.tip = tip
+                params.tip = tip || t('captcha.click')
             }
             if (props.initAction) {
                 if (typeof props.initAction === 'function') {
-                    afterInit()
-                    props.initAction()
-                } else {
-                    $request[props.initMethod.toLowerCase()](
+                    const initStatus = await props.initAction()
+                    if (initStatus === true) afterInit()
+                    else afterInit(typeof initStatus === 'string' ? initStatus : undefined, true)
+                    emit('init')
+                } else if (typeof props.initAction === 'string') {
+                    await $request[(props.initMethod || 'GET').toLowerCase()](
                         props.initAction,
                         props.initParams,
-                        props.actionConfig
+                        params.actionConfig
                     )
-                        .then((res: any) => {
+                        .then((res: ResponseData) => {
                             afterInit()
                             if (res?.data?.key && !params.verifyParams.key)
-                                params.verifyParams.key = res.data.key
+                                params.verifyParams.key = res?.data?.key
                             emit('init', res)
                         })
-                        .catch(() => {
-                            afterInit('初始化接口有误，请稍候再试')
-                        })
+                        .catch(() => afterInit(t('captcha.error.init'), true))
                 }
             } else afterInit()
         }
 
-        const showCaptchaModal = () => {
-            if (!params.init || params.status.success) return
-            params.tip = '智能检测中 ···'
-            params.status.ready = false
-            params.status.scanning = true
-            if (props.checkAction) {
-                $request[props.checkMethod.toLowerCase()](
-                    props.checkAction,
-                    props.checkParams,
-                    props.actionConfig
-                )
-                    .then((res: any) => {
-                        if (res.data.pass) params.pass = true
-                        else initCaptchaModal()
-                        emit('checked', res)
-                    })
-                    .catch(() => {
-                        params.pass = false
-                        initCaptchaModal()
-                    })
-            } else initCaptchaModal()
-        }
-
         const initCaptchaModal = () => {
-            params.status.scanning = false
-            params.status.being = true
-            params.modal.pos = getCaptchaModalPosition()
-            params.modal.show = true
-            params.tip = '请移动滑块，完成验证'
+            if (params.pass) {
+                handleCaptchaSuccess()
+            } else {
+                params.status.scanning = false
+                params.status.being = true
+                params.modal.position = getCaptchaModalPosition()
+                params.modal.open = true
+                params.tip = t('captcha.move')
+            }
         }
 
-        const closeCaptchaModal = (data: any) => {
-            if (data) {
-                if (data.status === 'close') reset()
-                if (data.status === 'success') success(data.data)
-                if (data.status === 'frequently') {
-                    reset()
-                    showMessage(`已连续错误达 ${props.maxTries} 次，请稍候再试`, 5)
+        const getCaptchaModalPosition = (): Position => {
+            if (!props.visible) return { left: '50%', top: '50%' } as Position
+            const elem = captchaContentRef.value as unknown as HTMLElement
+            let position = { left: 0, top: 0 } as Position
+            if (elem) {
+                if (width.value < $g.breakpoints.md) {
+                    position = { left: '50%', top: '50%' }
+                } else {
+                    const rect = elem.getBoundingClientRect()
+                    const top = Math.round(rect.top * 1000) / 1000 + params.offset.top
+                    const left = Math.round(rect.left * 1000) / 1000 + params.offset.left
+                    position = { left, top }
                 }
             }
+            return position
         }
 
-        const getCaptchaModalPosition = () => {
-            const elem = captchaRef.value as any
-            let pos = { left: 0, top: 0 }
-            if (elem) {
-                const rect = elem.getBoundingClientRect()
-                const top = Math.round(rect.top * 1000) / 1000 + params.offset.top
-                const left = Math.round(rect.left * 1000) / 1000 + params.offset.left
-                pos = { left, top }
-            }
-            return pos
+        const resetCaptcha = (reinit = true) => {
+            resetCaptchaStatus()
+            if (reinit) initCaptcha()
         }
 
-        const renderSuccessShow = () => {
-            const hex = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/
-            const rgb = /^(rgb|RGB)/
-            const successCls = `${prefixCls}-success`
-            const cls = `${successCls}${params.status.success ? ` ${successCls}-show` : ''}`
-            const backgroundColor = props.themeColor
-                ? hex.test(props.themeColor)
-                    ? $tools.colorHex2Rgba(props.themeColor, 0.2)
-                    : rgb.test(props.themeColor)
-                    ? $tools.colorHex2Rgba($tools.colorRgb2Hex(props.themeColor), 0.2)
-                    : props.themeColor
-                : null
-            const style = {
-                borderRadius: props.radius ? $tools.convert2Rem(props.radius) : null,
-                background: backgroundColor,
-                borderColor: props.themeColor ?? null
-            } as { [index: string]: any }
-            return <div class={cls} style={style}></div>
+        const resetCaptchaStatus = () => {
+            message.destroy()
+            params.status.ready = true
+            params.status.scanning = false
+            params.status.success = false
+            params.status.being = false
+            params.modal.open = false
+            params.tip = props.initAction
+                ? params.init
+                    ? t('captcha.click')
+                    : t('captcha.init')
+                : t('captcha.click')
         }
 
-        const showMessage = (msg = '错误提示', duration = 3) => {
-            const name = `${prefixCls}-message`
-            const exist = document.getElementById(name)
-            if (exist) exist.remove()
-            const elem = document.createElement('div') as HTMLElement
-            elem.id = name
-            elem.className = name
-            elem.innerHTML = `
-                <div class="${name}-content">
-                    <span>${msg}</span>
-                </div>
-            `
-            document.body.appendChild(elem)
-            if (params.timer) clearTimeout(params.timer)
-            params.timer = setTimeout(() => {
-                elem.remove()
-            }, duration * 1000)
-        }
-
-        const success = (data: any) => {
-            params.tip = '通过验证'
+        const handleCaptchaSuccess = (data?: any) => {
+            params.tip = tt('captcha.pass', 'Pass')
             emit('success', data)
             setTimeout(() => {
-                params.modal.show = false
+                params.status.ready = false
                 params.status.being = false
+                params.status.scanning = false
                 params.status.success = true
+                params.modal.open = false
             })
         }
 
-        const reset = () => {
-            params.modal.show = false
-            params.status.being = false
-            params.status.success = false
-            params.status.scanning = false
-            params.status.ready = true
-            params.tip = '点击按钮进行验证'
+        const handleCaptchaModal = async () => {
+            if (!params.failed) {
+                params.status.ready = false
+                params.status.scanning = true
+                params.tip = tt('captcha.checking', 'Scanning ···')
+                if (props.checkAction) {
+                    if (typeof props.checkAction === 'string') {
+                        $request[(props.checkMethod || 'GET').toLowerCase()](
+                            props.checkAction,
+                            props.checkParams,
+                            params.actionConfig
+                        )
+                            .then((res: ResponseData) => {
+                                if (res?.data?.pass) params.pass = true
+                                initCaptchaModal()
+                                emit('checked', res)
+                            })
+                            .catch(() => {
+                                params.pass = false
+                                initCaptchaModal()
+                            })
+                    } else if (typeof props.checkAction === 'function') {
+                        const checkStatus = await props.checkAction()
+                        if (typeof checkStatus === 'boolean') params.pass = checkStatus
+                        else params.pass = false
+                        initCaptchaModal()
+                        emit('checked')
+                    }
+                } else initCaptchaModal()
+            }
         }
 
-        const resize = () => {
-            params.modal.pos = getCaptchaModalPosition()
+        const handleCaptchaModalClose = (data: any) => {
+            if (data) {
+                if (data?.status === 'close') resetCaptchaStatus()
+                if (data?.status === 'success') handleCaptchaSuccess(data?.data)
+                if (data?.status === 'frequently') {
+                    resetCaptchaStatus()
+                    message.error(t('captcha.error.try', { num: props.maxTries }))
+                }
+            } else resetCaptchaStatus()
         }
 
-        const renderContent = () => {
-            const width = $tools.convert2Rem(props.width)
-            const height = $tools.convert2Rem(props.height)
-            const modal = params.modal.show ? (
-                <Teleport to="body" ref={captchaModalRef}>
-                    <MiCaptchaModal
-                        position={params.modal.pos}
-                        maxTries={props.maxTries}
-                        show={params.modal.show}
-                        mask={props.mask}
-                        maskClosable={props.maskClosable}
-                        boxShadow={props.modalBoxShadow}
-                        boxShadowBlur={props.modalBoxShadowBlur}
-                        boxShadowColor={props.modalBoxShadowColor}
-                        themeColor={props.themeColor}
-                        bgColor={props.modalBgColor}
-                        verifyMethod={props.verifyMethod}
-                        verifyParams={params.verifyParams}
-                        verifyAction={props.verifyAction}
-                        actionConfig={props.actionConfig}
-                        onModalClose={closeCaptchaModal}
-                        image={props.image}
-                    />
-                </Teleport>
+        const renderRadarReady = () => {
+            return params.status.ready ? (
+                <div class={styled.radarReady}>
+                    <div class={styled.radarRing} style={themeColorStyle.value}></div>
+                    <div class={styled.radarDot} style={themeColorStyle.value}></div>
+                </div>
             ) : null
-            return (
-                <>
-                    <div class={`${prefixCls}-content`} style={{ width, height }}>
-                        {renderRadar()}
-                        {renderSuccessShow()}
+        }
+
+        const renderRadarScan = () => {
+            return params.status.scanning ? (
+                <div class={styled.radarScan}>
+                    <div class={styled.radarScanRing}>
+                        <div
+                            style={{
+                                borderColor: props.color
+                                    ? `${props.color} transparent ${props.color} transparent`
+                                    : undefined
+                            }}
+                        />
+                        <div
+                            style={{
+                                borderColor: props.color
+                                    ? `transparent ${props.color} transparent ${props.color}`
+                                    : undefined
+                            }}
+                        />
                     </div>
-                    {modal}
-                </>
+                </div>
+            ) : null
+        }
+
+        const renderRadarBeing = () => {
+            return params.status.being ? <div class={styled.radarBeing}>···</div> : null
+        }
+
+        const renderRadarSuccess = () => {
+            return params.status.success ? (
+                <div class={styled.radarSuccess}>
+                    <VerifiedOutlined style={{ color: props.color ?? null }} />
+                </div>
+            ) : null
+        }
+
+        const renderRadarTip = () => {
+            return (
+                <div
+                    class={`${styled.radarTip}${params.failed ? ` ${styled.radarError}` : ''}`}
+                    style={{ height: $tools.convert2rem($tools.distinguishSize(props.height)) }}
+                    innerHTML={params.tip}
+                />
+            )
+        }
+
+        const renderRadarLogo = () => {
+            return (
+                <div class={styled.radarLogo} style={{ borderColor: props.color ?? null }}>
+                    <a href={props.link} target="_blank">
+                        <img src={props.logo ?? $g.logo} alt={$g.powered} />
+                    </a>
+                </div>
             )
         }
 
         const renderRadar = () => {
-            const cls = `${prefixCls}-radar${
-                params.status.success ? ` ${prefixCls}-radar-pass` : ''
-            }`
-            const style = {
-                borderRadius: props.radius ? $tools.convert2Rem(props.radius) : null,
-                borderColor: props.borderColor ?? props.themeColor ?? null,
-                background: props.bgColor ?? null,
-                boxShadow: props.boxShadow
-                    ? props.boxShadowColor || props.themeColor
-                        ? `0 0 ${$tools.convert2Rem(props.boxShadowBlur)} ${
-                              props.boxShadowColor || props.themeColor
-                          }`
-                        : 'none'
-                    : 'none'
-            }
             return (
-                <div class={cls} style={style}>
+                <div class={styled.radar} style={radarStyle.value}>
                     {renderRadarReady()}
                     {renderRadarScan()}
                     {renderRadarBeing()}
@@ -271,103 +312,88 @@ export default defineComponent({
             )
         }
 
-        const renderRadarReady = () => {
-            return params.status.ready ? (
-                <div class={`${prefixCls}-radar-ready`}>
-                    <div class={`${prefixCls}-radar-ring`} style={themeColorStyle.value} />
-                    <div
-                        class={`${prefixCls}-radar-dot`}
-                        style={themeColorStyle.value}
-                        ref={`${prefixCls}-radar-dot`}
-                    />
-                </div>
-            ) : null
-        }
-
-        const renderRadarScan = () => {
-            const borderColor = (
-                props.themeColor
-                    ? `${props.themeColor} transparent ${props.themeColor} transparent`
-                    : null
-            ) as any
-            const borderColor2 = (
-                props.themeColor
-                    ? `transparent ${props.themeColor} transparent ${props.themeColor}`
-                    : null
-            ) as any
-            return params.status.scanning ? (
-                <div class={`${prefixCls}-radar-scan`}>
-                    <div class="double-ring">
-                        <div style={{ borderColor }} />
-                        <div style={{ borderColor: borderColor2 }} />
-                    </div>
-                </div>
-            ) : null
-        }
-
-        const renderRadarBeing = () => {
-            return params.status.being ? (
-                <div class={`${prefixCls}-radar-being`} style={{ color: props.textColor ?? null }}>
-                    ···
-                </div>
-            ) : null
-        }
-
-        const renderRadarSuccess = () => {
-            const iconStyle = {
-                fontSize: $tools.convert2Rem(20),
-                color: props.themeColor ?? null
-            }
-            const radarSuccessCls = `${prefixCls}-radar-success`
+        const renderSuccess = () => {
             return params.status.success ? (
-                <div class={`${radarSuccessCls} ${radarSuccessCls}-icon`}>
-                    <VerifiedOutlined style={iconStyle} />
-                </div>
+                <Transition name={params.anim} appear={true}>
+                    <div class={styled.success} style={successStyle.value} />
+                </Transition>
             ) : null
         }
 
-        const renderRadarTip = () => {
-            const radarTipCls = `${prefixCls}-radar-tip`
-            const errCls = params.failed ? ` ${radarTipCls}-error` : ''
-            const cls = `${radarTipCls}${errCls}`
-            const style = {
-                height: $tools.convert2Rem(props.height),
-                color:
-                    params.status.success && props.themeColor
-                        ? props.themeColor
-                        : props.textColor ?? null
-            } as any
-            return <div class={cls} style={style} innerHTML={params.tip} />
-        }
-
-        const renderRadarLogo = () => {
-            const height = props.height && props.height > 40 ? props.height : null
-            const top = height ? Math.round(((height - 20) / 2) * 100) / 100 - 1 : null
-            const style = { top: height ? $tools.convert2Rem(top) : null }
+        const renderContent = () => {
+            const offset = props.offset
+                ? props.offset > 5
+                    ? 5
+                    : props.offset < 2
+                      ? 2
+                      : props.offset
+                : 2
+            const modal = params.modal.open ? (
+                <Teleport to="body" ref={captchaModalRef}>
+                    <MiCaptchaModal
+                        open={params.modal.open}
+                        position={params.modal.position}
+                        maxTries={props.maxTries}
+                        mask={props.mask}
+                        maskClosable={props.maskClosable}
+                        color={props.color}
+                        verifyParams={params.verifyParams}
+                        verifyMethod={props.verifyMethod}
+                        verifyAction={props.verifyAction}
+                        actionConfig={params.actionConfig}
+                        onClose={handleCaptchaModalClose}
+                        image={props.image}
+                        offset={offset}
+                        captchaVisible={props.visible}
+                    />
+                </Teleport>
+            ) : null
             return (
-                <div class={`${prefixCls}-radar-logo`} style={style}>
-                    <a href={params.target} target="_blank">
-                        <img src={props.logo ?? params.avatar} alt={params.powered} />
-                    </a>
-                </div>
+                <Fragment>
+                    <div
+                        ref={captchaContentRef}
+                        class={[
+                            styled.content,
+                            { [styled.failed]: params.failed },
+                            { [styled.hide]: !props.visible }
+                        ]}
+                        onClick={handleCaptchaModal}
+                        style={size.value}>
+                        {renderRadar()}
+                        {renderSuccess()}
+                    </div>
+                    {modal}
+                </Fragment>
             )
         }
 
-        const resetCaptcha = (reinit = true) => {
-            reset()
-            if (reinit) initCaptcha()
-        }
-        expose({ reset: (reinit = true) => resetCaptcha(reinit) })
+        onMounted(() => {
+            if (params.actionConfig?.url) delete params.actionConfig.url
+            if (params.actionConfig.method) delete params.actionConfig.method
+            initCaptcha()
+            $tools.on(window, 'resize', resetCaptchaStatus)
+        })
+
+        onUnmounted(() => {
+            handleCaptchaModalClose({ status: 'close' })
+            $tools.off(window, 'resize', resetCaptchaStatus)
+        })
+
+        /**
+         * @method resetCaptcha 重置验证码状态（可选是否重新初始化）
+         * @method openCaptcha 手动打开验证码弹窗
+         */
+        expose({
+            resetCaptcha: (reinit = true) => resetCaptcha(reinit),
+            openCaptcha: () => handleCaptchaModal()
+        })
 
         return () => (
-            <div
-                class={`${prefixCls}${$g.isMobile ? ` ${prefixCls}-mobile` : ''}`}
-                {...attrs}
-                onClick={showCaptchaModal}
-                key={`${prefixCls}-${$tools.uid()}`}
-                ref={captchaRef}>
+            <div ref={captchaRef} class={styled.container} key={uniqueKey} {...attrs}>
                 {renderContent()}
             </div>
         )
     }
 })
+
+export default MiCaptcha

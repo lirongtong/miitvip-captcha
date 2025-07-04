@@ -1,52 +1,45 @@
-import { App } from 'vue'
-import axios, { AxiosRequestConfig, AxiosResponse, Method } from 'axios'
+import { type App, ref } from 'vue'
+import { $g } from './global'
+import { $cookie } from './cookie'
+import { $storage } from './storage'
+import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios'
+import { __METHODS__, type RequestConfig } from './types'
 
 axios.defaults.baseURL = '/'
 axios.defaults.withCredentials = true
 axios.defaults.headers.common['Content-Type'] = 'application/json;charset=UTF-8;'
+const requestBaseURL = ref<string>('/')
 
-/**
- * 封装请求响应的类 ( 封装自 axios 插件 ).
- * - 请求/响应拦截器 `mixin.ts`
- * Request & Response class.
- * 包含 `get`, `post`, `put`, `delete` 等常用的请求方法.
- */
 class MiRequest {
+    [key: string]: any
     instance: MiRequest
 
     constructor() {
         this.instance = this
+        // 请求拦截器
+        axios.interceptors.request.use(
+            (config: any) => {
+                const token =
+                    $cookie.get($g?.caches?.cookies?.token?.access) ||
+                    $storage.get($g?.caches?.storages?.token?.access)
+                if (token) config.headers.Authorization = `Bearer ${token}`
+                return config
+            },
+            (err) => {
+                return Promise.reject(err)
+            }
+        )
         this.register()
     }
 
-    /**
-     * 注册相关的请求方法 ( 不包含 connect & trace 方法 ).
-     * Registration of common methods ( Without `CONNECT`, `TRACE` ).
-     *
-     * @return Promise
-     */
-    private register(): void {
-        const methods: Method[] = [
-            'get',
-            'post',
-            'put',
-            'patch',
-            'delete',
-            'options',
-            'head',
-            'link',
-            'unlink',
-            'purge'
-        ]
-        methods.forEach((method: Method) => {
+    register(): void {
+        const methods: string[] = [...__METHODS__]
+        methods.forEach((method: string) => {
             this.instance[method.toLowerCase()] = (
                 url: string,
                 data: { [index: string]: any } = {},
-                config?: AxiosRequestConfig & {
-                    retry?: number
-                    retryDelay?: number
-                    retryCount?: 0
-                }
+                config?: RequestConfig,
+                settled?: boolean
             ): Promise<any> => {
                 const args: { [index: string]: any } = {
                     url,
@@ -60,38 +53,91 @@ class MiRequest {
                     delete args.data
                     args.params = data
                 }
+                if (!config) config = {}
+                config.baseURL = requestBaseURL.value
                 const configuration = {
                     ...args,
                     ...config
                 }
-                return this.send(configuration)
+                return this.send(configuration, settled)
             }
         })
     }
 
-    /**
-     * 发送请求 ( Send Request ).
-     * @param config
-     * @returns Promise
-     */
-    private async send(config: AxiosRequestConfig): Promise<any> {
+    async send(config: AxiosRequestConfig, settled?: boolean): Promise<any> {
         if (!config.timeout) config.timeout = 60000
         return await axios(config)
             .then((res: AxiosResponse) => {
-                return Promise.resolve(res?.data)
+                return Promise.resolve(res?.data || res)
             })
             .catch((err: any) => {
-                return Promise.reject(err)
+                if (settled) return Promise.resolve(err)
+                else return Promise.reject(err)
             })
+    }
+
+    get(
+        url: string,
+        params?: Record<string, any>,
+        config?: RequestConfig,
+        settled?: boolean
+    ): Promise<any> {
+        return this.instance['get'](url, params, config, settled)
+    }
+
+    post(
+        url: string,
+        data?: Record<string, any>,
+        config?: RequestConfig,
+        settled?: boolean
+    ): Promise<any> {
+        return this.instance['post'](url, data, config, settled)
+    }
+
+    put(
+        url: string,
+        data?: Record<string, any>,
+        config?: RequestConfig,
+        settled?: boolean
+    ): Promise<any> {
+        return this.instance['put'](url, data, config, settled)
+    }
+
+    delete(
+        url: string,
+        data?: Record<string, any>,
+        config?: RequestConfig,
+        settled?: boolean
+    ): Promise<any> {
+        return this.instance['delete'](url, data, config, settled)
+    }
+
+    async all<T>(values: Array<T | Promise<T>>): Promise<T[]> {
+        return Promise.all(values)
+    }
+
+    setBaseUrl(url?: string) {
+        requestBaseURL.value = url ?? '/'
     }
 }
 
-export const $request = new MiRequest() as any
-
+/**
+ * 封装请求响应类 ( `axios` )
+ *  - 包含 `get, post, put, delete` 等10种请求方法.
+ *  - 显式外放 `get / post / put / delete` 请求方法
+ *
+ * e.g.
+ * ```
+ * this.$request.get('/v1/login', {
+ *     username: 'makeit.vip',
+ *     password: '123456'
+ * })
+ * ```
+ */
+export const $request = new MiRequest()
 export default {
     install(app: App) {
         app.config.globalProperties.$request = $request
-        app.provide('$request', $request)
         return app
     }
 }
