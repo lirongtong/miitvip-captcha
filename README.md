@@ -1,3 +1,10 @@
+# 🚨 Deprecated: Please use `@miitvip/captcha` instead
+
+> 该独立组件已不再更新（This package (`makeit-captcha`) is no longer maintained.）
+>
+> 👉 新版本在这里（The new and actively maintained version is available here）：
+> 🔗 https://www.npmjs.com/package/@miitvip/captcha
+
 <p align="center">
     <a href="https://admin.makeit.vip/">
         <img width="200" src="https://file.makeit.vip/MIITVIP/M00/00/00/K4vDRGPcbmmAG8_sAAAtlj6Tt_s562.png">
@@ -23,12 +30,6 @@
 ![axios](https://img.shields.io/badge/axios-1.3.2-red.svg)
 ![ant design vue](https://img.shields.io/badge/ant%20design%20vue-3.x-blueviolet.svg)
 </div>
-
-## 注
-
-> 独立组件不再更新
->
-> 请使用 [Makeit Admin Pro - Captcha](https://admin.makeit.vip/component/captcha) 组件
 
 ## 关于
 
