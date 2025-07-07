@@ -1,34 +1,38 @@
 import { type App, reactive } from 'vue'
 import { logo, background } from './images'
 
-export const MI_DEFAULT_AVATAT = logo
-export const MI_DEFAULT_BACKGROUND = background
-export const MI_POWERED = 'Powered By makeit.vip'
-export const MI_TARGET = 'https://admin.makeit.vip/components/captcha'
+export const __MI_DEFAULT_AVATAT__ = logo
+export const __MI_DEFAULT_BACKGROUND__ = background
+export const __MI_POWERED__ = 'Powered By makeit.vip'
+export const __MI_TARGET__ = 'https://admin.makeit.vip/components/captcha'
 
 /**
  * 全局通用变量.
  * Global variable.
  */
 export const $g = reactive({
-    name: 'Makeit Admin Pro',
-    title: 'Makeit Admin Pro',
-    site: 'Admin Pro',
+    name: 'Makeit Captcha',
+    title: 'Makeit Captcha',
+    site: 'Captcha',
     author: 'makeit.vip',
-    background: MI_DEFAULT_BACKGROUND,
+    background: __MI_DEFAULT_BACKGROUND__,
     keywords: 'makeit, 麦可易特网, makeit-captcha, captcha, 滑块验证码, vue3, vite, canvas',
     description:
         '基于 Vue3.x + Vite6.x + Canvas 开发的滑块验证码。动态生成验证滑块，结合后端的二次校验，能有效的避免被其他人肆意抓取并模拟验证，进一步提升验证码的的可靠性，且能满足大部分用户的不同定制化需求，譬如自定义背景图 / 定制主题色等等。',
-    powered: MI_POWERED,
+    powered: __MI_POWERED__,
 
     /**
      * 前缀.
      * anywhere you want to used, eg: cookie, storage, vuex ...
      */
     prefix: 'mi-',
-
-    logo: MI_DEFAULT_AVATAT,
-    avatar: MI_DEFAULT_AVATAT,
+    theme: {
+        type: 'dark',
+        primary: '#FFD464',
+        radius: 6
+    },
+    logo: __MI_DEFAULT_AVATAT__,
+    avatar: __MI_DEFAULT_AVATAT__,
 
     /**
      * 加密盐值 ( 可自行通过 env 配置进行覆盖 ).
@@ -70,6 +74,10 @@ export const $g = reactive({
             }
         },
         storages: {
+            theme: {
+                type: 'theme-type',
+                hex: 'theme-color-hex'
+            },
             token: {
                 access: 'access-token',
                 refresh: 'refresh-token'

@@ -9,10 +9,20 @@ export default defineConfig({
     build: {
         lib: {
             entry: path.resolve(__dirname, 'src/index.ts'),
-            name: 'MiCaptcha'
+            name: 'MiCaptcha',
+            fileName: 'makeit-captcha.min.js'
         },
+        sourcemap: true,
         rollupOptions: {
-            external: ['vue', 'ant-design-vue', 'vue-i18n', '@ant-design/icons-vue'],
+            external: [
+                'vue',
+                'ant-design-vue',
+                'vue-i18n',
+                '@ant-design/icons-vue',
+                'axios',
+                'vue-types',
+                '@material/material-color-utilities'
+            ],
             plugins: [
                 babel({
                     babelHelpers: 'bundled',
@@ -32,24 +42,34 @@ export default defineConfig({
             output: [
                 {
                     format: 'iife',
-                    dir: 'dist/iife',
+                    dir: 'dist',
                     entryFileNames: 'makeit-captcha.min.js',
+                    assetFileNames: 'makeit-captcha.min.css',
                     name: 'MiCaptcha',
                     globals: {
                         vue: 'Vue',
                         'ant-design-vue': 'AntDesignVue',
                         'vue-i18n': 'VueI18n',
-                        '@ant-design/icons-vue': 'AntDesignIconsVue'
+                        '@ant-design/icons-vue': 'AntDesignIconsVue',
+                        axios: 'Axios',
+                        'vue-types': 'VueTypes',
+                        '@material/material-color-utilities': 'MaterialColorUtilities'
                     },
-                    exports: 'named',
-                    assetFileNames: (assetInfo) => {
-                        if (assetInfo.name && assetInfo.name.endsWith('.css')) {
-                            return 'makeit-captcha.min.css'
-                        }
-                        return '[name]-[hash][extname]'
-                    }
+                    exports: 'named'
                 }
             ]
+        }
+    },
+    css: {
+        devSourcemap: true,
+        modules: {
+            generateScopedName: 'mi-[name]-[hash:base64:8]',
+            localsConvention: 'camelCase'
+        },
+        preprocessorOptions: {
+            less: {
+                javascriptEnabled: true
+            }
         }
     }
 })

@@ -3,27 +3,65 @@
     "version": "1.0.0",
     "private": false,
     "type": "module",
-    "main": "dist/lib/makeit-captcha.cjs.js",
-    "module": "dist/es/makeit-captcha.es.js",
+    "author": {
+        "url": "https://admin.makeit.vip",
+        "name": "makeit",
+        "email": "lirongtong@hotmail.com",
+        "github": "https://github.com/lirongtong"
+    },
+    "keywords": [
+        "vue",
+        "vue3",
+        "makeit",
+        "miitvip",
+        "makeit admin pro",
+        "makeitAdminPro",
+        "vueComponent",
+        "component",
+        "components",
+        "captcha",
+        "makeit captcha",
+        "MakeitCaptcha",
+        "miitvip captcha"
+    ],
+    "description": "Makeit Captcha 滑块验证码组件，基于 Vue3.x + Vite6.x + Canvas 开发，动态生成验证滑块，结合后端进行二次校验，能有效避免被恶意抓取后的模拟验证，进一步提升验证码的可靠性。( Makeit Captcha slider verification code component, developed based on Vue3.x + Vite6.x + Canvas, dynamically generates a verification slider and combines it with the backend for secondary verification. It can effectively avoid simulated verification after malicious crawling and further improve the reliability of the verification code. )",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/lirongtong/miitvip-captcha.git"
+    },
+    "bugs": {
+        "url": "https://github.com/lirongtong/miitvip-captcha/issues"
+    },
+    "homepage": "https://admin.makeit.vip",
+    "main": "lib/index.cjs.js",
+    "module": "es/index.mjs",
     "unpkg": "dist/makeit-captcha.min.js",
-    "types": "./dist/es/index.d.ts",
+    "types": "./es/index.d.ts",
     "exports": {
         ".": {
-            "types": "./dist/es/index.d.ts",
-            "import": "./dist/es/makeit-captcha.es.js",
-            "require": "./dist/lib/makeit-captcha.cjs.js"
+            "types": "./es/index.d.ts",
+            "style": "./dist/makeit-captcha.min.css",
+            "import": "./es/index.mjs",
+            "require": "./lib/index.cjs.js"
+        },
+        "./dist/makeit-captcha.min.css": {
+            "default": "./dist/makeit-captcha.min.css"
         }
     },
     "files": [
         "dist",
+        "es",
+        "lib",
         "README.md"
     ],
     "scripts": {
         "dev": "vite",
-        "clean": "rimraf dist",
-        "build": "npm run clean && npm run build:base && npm run build:iife",
-        "build:base": "vite build --config vite.config.base.ts",
-        "build:iife": "vite build --config vite.config.iife.ts",
+        "clean": "rimraf dist es lib",
+        "build": "npm run clean && npm run build:es && npm run build:lib && npm run build:dist",
+        "build:es": "vite build --config vite.config.es.ts",
+        "build:lib": "vite build --config vite.config.lib.ts",
+        "build:dist": "vite build --config vite.config.dist.ts",
         "preview": "vite preview",
         "build-only": "vite build",
         "type-check": "vue-tsc --build tsconfig.app.json",
@@ -31,6 +69,7 @@
         "format": "prettier --write src/"
     },
     "dependencies": {
+        "@material/material-color-utilities": "^0.3.0",
         "ant-design-vue": "^4.2.6",
         "axios": "^1.10.0",
         "vue": "^3.5.17",
@@ -57,6 +96,7 @@
         "rimraf": "^6.0.1",
         "rollup-plugin-dts": "^6.2.1",
         "typescript": "~5.8.0",
+        "typescript-plugin-css-modules": "^5.1.0",
         "vite": "^6.3.5",
         "vite-plugin-dts": "^4.5.4",
         "vite-plugin-vue-devtools": "^7.7.7",
@@ -64,5 +104,9 @@
     },
     "engines": {
         "node": ">=20.x.x"
-    }
+    },
+    "sideEffects": [
+        "**/*.less",
+        "**/*.css"
+    ]
 }

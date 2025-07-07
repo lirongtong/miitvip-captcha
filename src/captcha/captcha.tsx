@@ -10,16 +10,18 @@ import {
     onUnmounted
 } from 'vue'
 import { CaptchaProps } from './props'
-import { $g } from '../utils/global'
+import { $g, __MI_DEFAULT_AVATAT__, __MI_POWERED__, __MI_TARGET__ } from '../utils/global'
 import { $tools } from '../utils/tools'
 import useWindowResize from '../hooks/useWindowResize'
 import type { Position, ResponseData } from '../utils/types'
 import { getPrefixCls } from '../utils/props'
 import { useI18n } from 'vue-i18n'
 import { $request } from '../utils/request'
+import { $storage } from '../utils/storage'
 import { message } from 'ant-design-vue'
 import { VerifiedOutlined } from '@ant-design/icons-vue'
 import MiCaptchaModal from './modal'
+import applyTheme from '../utils/theme'
 import styled from './style/captcha.module.less'
 
 const MiCaptcha = defineComponent({
@@ -100,6 +102,18 @@ const MiCaptcha = defineComponent({
                   }
                 : null
         })
+
+        // theme tokens
+        const primaryColor = $storage.get($g.caches.storages.theme.hex)
+        const moduleThemeVars = $tools.getThemeModuleProperties(styled)
+        const globalThemeVars: Record<string, any> = Object.assign({}, moduleThemeVars)
+        $g.theme.primary = $tools.isColorString(props.primaryColor)
+            ? props.primaryColor
+            : primaryColor || globalThemeVars?.primary || styled?.primary
+        $g.theme.radius = parseInt($g?.theme?.radius || globalThemeVars?.radius || styled?.radius)
+        $tools.createThemeProperties($g.theme.primary)
+
+        applyTheme(styled)
 
         const tt = (key: string, fallback: string) => (te(key) ? t(key) : fallback)
 
@@ -291,9 +305,9 @@ const MiCaptcha = defineComponent({
 
         const renderRadarLogo = () => {
             return (
-                <div class={styled.radarLogo} style={{ borderColor: props.color ?? null }}>
-                    <a href={props.link} target="_blank">
-                        <img src={props.logo ?? $g.logo} alt={$g.powered} />
+                <div class={styled.radarLogo} style={{ borderColor: props.color ?? undefined }}>
+                    <a href={props.link || __MI_TARGET__} target="_blank">
+                        <img src={props.logo || __MI_DEFAULT_AVATAT__} alt={__MI_POWERED__} />
                     </a>
                 </div>
             )
@@ -332,6 +346,7 @@ const MiCaptcha = defineComponent({
                 <Teleport to="body" ref={captchaModalRef}>
                     <MiCaptchaModal
                         open={params.modal.open}
+                        logo={props.logo || __MI_DEFAULT_AVATAT__}
                         position={params.modal.position}
                         maxTries={props.maxTries}
                         mask={props.mask}

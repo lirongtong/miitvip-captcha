@@ -30,6 +30,7 @@ import { __METHODS__, tuple } from '../utils/types'
  * @param actionConfig 请求配置( axios config )
  * @param offset 本地校验偏差值 ( 2 - 5px )
  * @param visible 是否显示触发按钮
+ * @param primaryColor 主题色
  */
 export interface CaptchaProperties {
     width: string | number | DeviceSize
@@ -55,6 +56,7 @@ export interface CaptchaProperties {
     actionConfig: AxiosRequestConfig
     offset: number
     visible: boolean
+    primaryColor: string
 }
 export const CaptchaProps = () => ({
     width: PropTypes.oneOfType([PropTypes.string, PropTypes.number, object<DeviceSize>()]).def(320),
@@ -79,7 +81,8 @@ export const CaptchaProps = () => ({
     checkAction: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
     actionConfig: object<AxiosRequestConfig>().def({}),
     offset: PropTypes.number.def(2),
-    visible: PropTypes.bool.def(true)
+    visible: PropTypes.bool.def(true),
+    primaryColor: PropTypes.string.def('#386E57')
 })
 
 /**
@@ -88,6 +91,7 @@ export const CaptchaProps = () => ({
  * +===========================+
  * @param open 弹窗开启状态
  * @param position 弹窗弹出位置
+ * @param logo 图标
  * @param image 验证码底图
  * @param color 主题色
  * @param mask 遮罩
@@ -103,6 +107,7 @@ export const CaptchaProps = () => ({
 export interface CaptchaModalProperties {
     open: boolean
     position: Position
+    logo: string
     image: string
     color: string
     mask: boolean
@@ -118,6 +123,7 @@ export interface CaptchaModalProperties {
 export const CaptchaModalProps = () => ({
     open: PropTypes.bool.def(false),
     position: object<Position>(),
+    logo: PropTypes.string.def(undefined),
     image: PropTypes.string.def(undefined),
     color: PropTypes.string.def(undefined),
     mask: PropTypes.bool.def(true),

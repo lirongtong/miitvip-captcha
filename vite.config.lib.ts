@@ -13,10 +13,9 @@ export default defineConfig({
         vueDevTools(),
         dts({
             entryRoot: path.resolve(__dirname, 'src'),
-            outDir: ['dist/es', 'dist/lib'],
+            tsconfigPath: path.resolve(__dirname, 'tsconfig.lib.json'),
             include: ['src'],
-            tsconfigPath: path.resolve(__dirname, 'tsconfig.app.json'),
-            rollupTypes: true,
+            outDir: 'lib',
             copyDtsFiles: true,
             insertTypesEntry: true,
             cleanVueFileName: true
@@ -27,26 +26,40 @@ export default defineConfig({
             entry: path.resolve(__dirname, 'src/index.ts'),
             name: 'MiCaptcha'
         },
+        cssCodeSplit: true,
+        minify: true,
         rollupOptions: {
-            external: ['vue', 'ant-design-vue', 'vue-i18n', '@ant-design/icons-vue'],
+            external: [
+                'vue',
+                'ant-design-vue',
+                'vue-i18n',
+                '@ant-design/icons-vue',
+                'axios',
+                'vue-types',
+                '@material/material-color-utilities'
+            ],
             output: [
                 {
-                    format: 'es',
-                    dir: 'dist/es',
-                    preserveModules: true,
-                    preserveModulesRoot: 'src',
-                    entryFileNames: '[name].mjs',
-                    exports: 'named'
-                },
-                {
                     format: 'cjs',
-                    dir: 'dist/lib',
+                    dir: 'lib',
                     preserveModules: true,
                     preserveModulesRoot: 'src',
                     entryFileNames: '[name].cjs.js',
                     exports: 'named'
                 }
             ]
+        }
+    },
+    css: {
+        devSourcemap: true,
+        modules: {
+            generateScopedName: 'mi-[name]-[hash:base64:8]',
+            localsConvention: 'camelCase'
+        },
+        preprocessorOptions: {
+            less: {
+                javascriptEnabled: true
+            }
         }
     }
 })

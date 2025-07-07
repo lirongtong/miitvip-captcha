@@ -17,7 +17,7 @@
         "allowSyntheticDefaultImports": true,
         "forceConsistentCasingInFileNames": true,
         "declaration": true,
-        "declarationDir": "es",
+        "declarationDir": "lib",
         "emitDeclarationOnly": false,
         "isolatedModules": false,
         "skipLibCheck": true,

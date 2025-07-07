@@ -40,18 +40,43 @@
 ## 安装
 
 ```bash
-npm i makeit-captcha
+npm i @miitvip/captcha
 ```
 
 ## 使用
 
 ```ts
 import { createApp } from 'vue'
-import MakeitCaptcha from 'makeit-captcha'
-import 'makeit-captcha/dist/captcha.min.css'
+import MakeitCaptcha from '@miitvip/captcha'
+import '@miitvip/captcha/dist/makeit-captcha.min.css'
 import App from './app.vue'
 
 const app = createApp(App)
+app.use(MakeitCaptcha)
+app.mount('#app')
+```
+
+## 国际化（本身项目包含 vue-i18n）
+
+```ts
+/**
+ * 如果项目本身有引入 vue-i18n，请导出 setupCaptchaI18n，
+ * 且在 captcha 组件 install 之前调用。
+ * 避免 vue-i18n 冲突（多次实例化）
+ * 如下示例：
+ */
+import { createApp } from 'vue'
+import MakeitCaptcha, { setupCaptchaI18n } from '@miitvip/captcha'
+import '@miitvip/captcha/dist/makeit-captcha.min.css'
+import App from './app.vue'
+
+const app = createApp(App)
+const i18n = createI18n({
+    legacy: false,
+    locale: 'zh-cn',
+    messages: {}
+})
+setupCaptchaI18n(i18n)
 app.use(MakeitCaptcha)
 app.mount('#app')
 ```
@@ -68,8 +93,8 @@ app.mount('#app')
         <!-- 手动触发重置 -->
         <a @click="reset">重置</a>
 
-        <!-- 自定义主题色 -->
-        <mi-captcha theme-color="#2F9688" border-color="#2F9688" box-shadow-color="#2F9688" />
+        <!-- 自定义主题色 ( 颜色值  ) -->
+        <mi-captcha primary-color="#2F9688" />
 
         <!-- 自定义初始化 / 校验等 -->
         <mi-captcha

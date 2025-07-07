@@ -1,7 +1,13 @@
 import { ref, defineComponent, onMounted, onUnmounted, nextTick, Fragment, Transition } from 'vue'
 import { CaptchaModalProps, type CaptchaModalBlockPosition } from './props'
 import { getPrefixCls } from '../utils/props'
-import { $g } from '../utils/global'
+import {
+    $g,
+    __MI_DEFAULT_AVATAT__,
+    __MI_DEFAULT_BACKGROUND__,
+    __MI_POWERED__,
+    __MI_TARGET__
+} from '../utils/global'
 import { $tools } from '../utils/tools'
 import { $request } from '../utils/request'
 import useWindowResize from '../hooks/useWindowResize'
@@ -9,6 +15,7 @@ import type { CanvasOperation, ResponseData } from '../utils/types'
 import { useI18n } from 'vue-i18n'
 import { Tooltip } from 'ant-design-vue'
 import { CloseCircleOutlined, ReloadOutlined, QuestionCircleOutlined } from '@ant-design/icons-vue'
+import applyTheme from '../utils/theme'
 import styled from './style/modal.module.less'
 
 const MiCaptchaModal = defineComponent({
@@ -33,9 +40,9 @@ const MiCaptchaModal = defineComponent({
         const anim = ref(getPrefixCls('anim-scale'))
         const loading = ref(true)
         const _background = ref('')
-        const background = ref($g.background)
-        const site = ref($g.site)
-        const powered = ref($g.powered)
+        const background = ref(__MI_DEFAULT_BACKGROUND__)
+        const site = ref(__MI_TARGET__)
+        const powered = ref(__MI_POWERED__)
 
         const check = ref({
             tries: props.maxTries || 5,
@@ -84,13 +91,15 @@ const MiCaptchaModal = defineComponent({
             end: null as number | null
         })
 
+        applyTheme(styled)
+
         const tt = (key: string, fallback: string) => (te(key) ? t(key) : fallback)
 
         const handlePointerUp = () => dragEnd()
         const handleTouchEnd = () => dragEnd()
 
         const init = () => {
-            _background.value = props.image ?? background.value
+            _background.value = props.image || background.value
             initModal()
         }
 
@@ -443,7 +452,6 @@ const MiCaptchaModal = defineComponent({
                         width.value < $g.breakpoints.md ? ` ${styled.maskMobile}` : ''
                     }`}
                     onClick={handleClose}
-                    style={{ zIndex: Date.now() }}
                 />
             ) : null
         }
@@ -542,8 +550,7 @@ const MiCaptchaModal = defineComponent({
                         color={props.color}
                         arrowPointAtCenter={true}
                         autoAdjustOverflow={false}
-                        overlayClassName={styled.panelActionTooltip}
-                        style={{ zIndex: Date.now() }}>
+                        overlayClassName={styled.panelActionTooltip}>
                         <CloseCircleOutlined onClick={handleClose} />
                     </Tooltip>
                     <Tooltip
@@ -551,8 +558,7 @@ const MiCaptchaModal = defineComponent({
                         color={props.color}
                         arrowPointAtCenter={true}
                         autoAdjustOverflow={false}
-                        overlayClassName={styled.panelActionTooltip}
-                        style={{ zIndex: Date.now() }}>
+                        overlayClassName={styled.panelActionTooltip}>
                         <ReloadOutlined onClick={handleRefresh} />
                     </Tooltip>
                     <Tooltip
@@ -560,8 +566,7 @@ const MiCaptchaModal = defineComponent({
                         color={props.color}
                         arrowPointAtCenter={true}
                         autoAdjustOverflow={false}
-                        overlayClassName={styled.panelActionTooltip}
-                        style={{ zIndex: Date.now() }}>
+                        overlayClassName={styled.panelActionTooltip}>
                         <a href={site.value} target="_blank">
                             <QuestionCircleOutlined />
                         </a>
@@ -581,10 +586,12 @@ const MiCaptchaModal = defineComponent({
                             color={props.color}
                             arrowPointAtCenter={true}
                             autoAdjustOverflow={false}
-                            overlayClassName={styled.panelActionTooltip}
-                            style={{ zIndex: Date.now() }}>
+                            overlayClassName={styled.panelActionTooltip}>
                             <a href={site.value} target="_blank">
-                                <img src={$g.logo || $g.logo} alt={powered.value} />
+                                <img
+                                    src={props.logo || __MI_DEFAULT_AVATAT__}
+                                    alt={powered.value}
+                                />
                             </a>
                         </Tooltip>
                     </div>
