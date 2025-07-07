@@ -9,6 +9,9 @@
         "email": "lirongtong@hotmail.com",
         "github": "https://github.com/lirongtong"
     },
+    "publishConfig": {
+        "access": "public"
+    },
     "keywords": [
         "vue",
         "vue3",
