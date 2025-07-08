@@ -132,4 +132,4 @@ app.mount('#app')
 
 ## 更多
 
-> 更多定制化内容及使用请查看在线示例：[https://admin.makeit.vip/components/captcha](https://admin.makeit.vip/components/captcha)
+> 更多定制化内容及使用请查看在线示例：[https://admin.makeit.vip/component/captcha](https://admin.makeit.vip/component/captcha)
